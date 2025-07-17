@@ -41,6 +41,7 @@ public class BattleSystem : MonoBehaviour
         {
             Vector3 mouseWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             Vector2Int cell = new Vector2Int(Mathf.RoundToInt(mouseWorld.x), Mathf.RoundToInt(mouseWorld.y));
+
             // Проверка: клик по юниту
             if (playerUnit.gridPosition == cell)
             {
@@ -51,20 +52,14 @@ public class BattleSystem : MonoBehaviour
             // Если выбран юнит и клик по клетке
             if (selectedUnit != null && !gridManager.IsCellOccupied(cell))
             {
+                //TODO: проверка на равен ли playerUnit.gridPosition == cell
+                // персонаж не должен ходить на ту же клетку где стоит
+
                 // Построить путь
-                var path = AStarPathfinder.FindPath(selectedUnit.gridPosition, cell, InvertOccupiedForUnit(selectedUnit));
-                if (path.Count > 1)
-                {
-                    // Освободить старую клетку
-                    gridManager.SetCellOccupied(selectedUnit.gridPosition, false);
-                    // Занять новую (последнюю в пути)
-                    gridManager.SetCellOccupied(cell, true);
-                    selectedUnit.MoveAlongPath(path);
-                    selectedUnit.gridPosition = cell;
-                    selectedUnit = null;
-                    // После движения — завершить ход
-                    NextTurn();
-                }
+                var path = PathFindingHelper.FindPath(gridManager.Grid, selectedUnit.gridPosition, cell);
+
+                // перемещение
+                gridManager.MoveUnit(selectedUnit, path.End);
             }
             // Если клик по врагу и он в соседней клетке — атаковать
             if (selectedUnit != null && cell == enemyUnit.gridPosition && IsAdjacent(selectedUnit.gridPosition, cell))
@@ -186,7 +181,7 @@ public class BattleSystem : MonoBehaviour
                 // Занять новую (следующую по пути)
                 Vector2Int nextCell = path[1];
                 gridManager.SetCellOccupied(nextCell, true);
-                enemyUnit.MoveAlongPath(new List<Vector2Int> { nextCell });
+                //enemyUnit.MoveAlongPath(new List<Vector2Int> { nextCell });
                 enemyUnit.gridPosition = nextCell;
             }
         }
