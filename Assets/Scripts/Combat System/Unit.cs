@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.AI; // ��������� ������������ ���� ��� NavMeshAgent
 
 public class Unit : MonoBehaviour
 {
@@ -18,6 +17,8 @@ public class Unit : MonoBehaviour
     public int luck;
 
     public bool IsAlive => currentHP > 0;
+
+    public Vector2Int gridPosition;
 
     public void Init(string name, int level, int hp, int mp, int atk, int def, int agi, int luk)
     {
@@ -54,5 +55,27 @@ public class Unit : MonoBehaviour
     {
         currentMP += amount;
         if (currentMP > maxMP) currentMP = maxMP;
+    }
+
+    public void SetGridPosition(Vector2Int pos)
+    {
+        gridPosition = pos;
+        // Перемещаем объект в позицию Tilemap (например, через Tilemap.CellToWorld)
+        // Здесь просто пример:
+        transform.position = new Vector3(pos.x, pos.y, 0);
+    }
+
+    public void MoveAlongPath(List<Vector2Int> path)
+    {
+        StartCoroutine(MoveCoroutine(path));
+    }
+
+    private IEnumerator MoveCoroutine(List<Vector2Int> path)
+    {
+        foreach (var pos in path)
+        {
+            SetGridPosition(pos);
+            yield return new WaitForSeconds(0.2f); // скорость шага
+        }
     }
 }

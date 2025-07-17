@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.AI; // Добавляем пространство имен для NavMeshAgent
 
 public enum BattleState { START, PLAYERTURN, ENEMYTURN, WON, LOST }
 
@@ -18,10 +17,62 @@ public class BattleSystem : MonoBehaviour
     public float timeBetweenAttacks = 2f; // Интервал между атаками.
     private float nextAttackTime;
 
+    public GridManager gridManager;
+    private Unit selectedUnit;
+
     void Start()
     {
         state = BattleState.START;
         SetupBattle();
+        // gridManager должен быть назначен в инспекторе или через FindObjectOfType
+    }
+
+    void Update()
+    {
+        if (state == BattleState.PLAYERTURN)
+        {
+            HandlePlayerInput();
+        }
+    }
+
+    void HandlePlayerInput()
+    {
+        if (Input.GetMouseButtonDown(0))
+        {
+            Vector3 mouseWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            Vector2Int cell = new Vector2Int(Mathf.RoundToInt(mouseWorld.x), Mathf.RoundToInt(mouseWorld.y));
+            // Проверка: клик по юниту
+            if (playerUnit.gridPosition == cell)
+            {
+                selectedUnit = playerUnit;
+                // TODO: подсветить выбранного юнита
+                return;
+            }
+            // Если выбран юнит и клик по клетке
+            if (selectedUnit != null && !gridManager.IsCellOccupied(cell))
+            {
+                // Построить путь
+                var path = AStarPathfinder.FindPath(selectedUnit.gridPosition, cell, InvertOccupiedForUnit(selectedUnit));
+                if (path.Count > 1)
+                {
+                    // Освободить старую клетку
+                    gridManager.SetCellOccupied(selectedUnit.gridPosition, false);
+                    // Занять новую (последнюю в пути)
+                    gridManager.SetCellOccupied(cell, true);
+                    selectedUnit.MoveAlongPath(path);
+                    selectedUnit.gridPosition = cell;
+                    selectedUnit = null;
+                    // После движения — завершить ход
+                    NextTurn();
+                }
+            }
+            // Если клик по врагу и он в соседней клетке — атаковать
+            if (selectedUnit != null && cell == enemyUnit.gridPosition && IsAdjacent(selectedUnit.gridPosition, cell))
+            {
+                OnPlayerAttack();
+                selectedUnit = null;
+            }
+        }
     }
 
     void SetupBattle()
@@ -101,37 +152,45 @@ public class BattleSystem : MonoBehaviour
         NextTurn();
     }
 
+    bool[,] InvertOccupiedForUnit(Unit unit)
+    {
+        // Копия сетки, где клетка юнита считается свободной (чтобы он мог выйти из неё)
+        var occ = (bool[,])gridManager.GetOccupiedGrid().Clone();
+        occ[unit.gridPosition.x, unit.gridPosition.y] = false;
+        return occ;
+    }
+
+    bool IsAdjacent(Vector2Int a, Vector2Int b)
+    {
+        return Mathf.Abs(a.x - b.x) + Mathf.Abs(a.y - b.y) == 1;
+    }
+
     IEnumerator EnemyTurn()
     {
         yield return new WaitForSeconds(1f);
-
-        // Enemy AI Logic
-        float distanceToPlayer = Vector3.Distance(enemyUnit.transform.position, playerUnit.transform.position);
-
-        if (distanceToPlayer <= enemyAttackRange && Time.time >= nextAttackTime)
+        // AI: если враг рядом с игроком — атаковать
+        if (IsAdjacent(enemyUnit.gridPosition, playerUnit.gridPosition))
         {
-            // Attack the Player
             int damage = Mathf.Max(1, enemyUnit.attack - playerUnit.defense);
             playerUnit.TakeDamage(damage);
-            // Здесь можно обновить UI
-            nextAttackTime = Time.time + timeBetweenAttacks;
+            // TODO: обновить UI
         }
         else
         {
-            // Move towards the Player
-            NavMeshAgent agent = enemyUnit.GetComponent<NavMeshAgent>();
-
-            if (agent != null)
+            // Построить путь к игроку
+            var path = AStarPathfinder.FindPath(enemyUnit.gridPosition, playerUnit.gridPosition, InvertOccupiedForUnit(enemyUnit));
+            if (path.Count > 1)
             {
-                agent.SetDestination(playerUnit.transform.position);
-            }
-            else
-            {
-                Debug.LogError("NavMeshAgent not found on enemy unit.  Add a NavMeshAgent component to the enemy prefab.");
+                // Освободить старую клетку
+                gridManager.SetCellOccupied(enemyUnit.gridPosition, false);
+                // Занять новую (следующую по пути)
+                Vector2Int nextCell = path[1];
+                gridManager.SetCellOccupied(nextCell, true);
+                enemyUnit.MoveAlongPath(new List<Vector2Int> { nextCell });
+                enemyUnit.gridPosition = nextCell;
             }
         }
-        yield return new WaitForSeconds(1f); // Added small delay after enemy action
-
+        yield return new WaitForSeconds(1f);
         NextTurn();
     }
 
