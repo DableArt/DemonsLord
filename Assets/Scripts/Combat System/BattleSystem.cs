@@ -12,19 +12,14 @@ public class BattleSystem : MonoBehaviour
     public BattleState state;
     private Queue<Unit> turnQueue = new Queue<Unit>();
 
-    // AI Related
-    public float enemyAttackRange = 2f; // Дистанция, с которой враг атакует.
-    public float timeBetweenAttacks = 2f; // Интервал между атаками.
-    private float nextAttackTime;
-
     public GridManager gridManager;
+    public UIManager uiManager;
     private Unit selectedUnit;
 
     void Start()
     {
         state = BattleState.START;
         SetupBattle();
-        // gridManager должен быть назначен в инспекторе или через FindObjectOfType
     }
 
     void Update()
@@ -42,37 +37,39 @@ public class BattleSystem : MonoBehaviour
             Vector3 mouseWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             Vector2Int cell = new Vector2Int(Mathf.RoundToInt(mouseWorld.x), Mathf.RoundToInt(mouseWorld.y));
 
-            // Проверка: клик по юниту
             if (playerUnit.gridPosition == cell)
             {
                 selectedUnit = playerUnit;
-                // TODO: подсветить выбранного юнита
+                // TODO: Подсветка
                 return;
             }
-            // Если выбран юнит и клик по клетке
-            if (selectedUnit != null && !gridManager.IsCellOccupied(cell))
+            if (selectedUnit != null && playerUnit == selectedUnit)
             {
-                //TODO: проверка на равен ли playerUnit.gridPosition == cell
-                // персонаж не должен ходить на ту же клетку где стоит
+                if (gridManager.IsCellOccupied(cell)) return;
+                var path = PathFindingHelper.FindPath(gridManager.grid, selectedUnit.gridPosition, cell);
 
-                // Построить путь
-                var path = PathFindingHelper.FindPath(gridManager.Grid, selectedUnit.gridPosition, cell);
-
-                // перемещение
-                gridManager.MoveUnit(selectedUnit, path.End);
+                if (path.IsValid && path.Length > 1)
+                {
+                    gridManager.MoveUnit(selectedUnit, path.End);
+                    uiManager.UpdateUnitUI(selectedUnit);
+                    selectedUnit = null;
+                    NextTurn();
+                    return;
+                }
             }
-            // Если клик по врагу и он в соседней клетке — атаковать
-            if (selectedUnit != null && cell == enemyUnit.gridPosition && IsAdjacent(selectedUnit.gridPosition, cell))
+            if (selectedUnit != null && cell == enemyUnit.gridPosition)
             {
-                OnPlayerAttack();
-                selectedUnit = null;
+                if (IsAdjacent(selectedUnit.gridPosition, cell))
+                {
+                    OnPlayerAttack();
+                    selectedUnit = null;
+                }
             }
         }
     }
 
     void SetupBattle()
     {
-        // Пример инициализации (заменить на создание через префабы/данные)
         playerUnit.Init("Hero", 1, 100, 30, 20, 10, 15, 5);
         enemyUnit.Init("Skeleton", 1, 80, 10, 15, 8, 10, 2);
 
@@ -109,6 +106,7 @@ public class BattleSystem : MonoBehaviour
         if (current == playerUnit)
         {
             state = BattleState.PLAYERTURN;
+            selectedUnit = null;
             OnPlayerTurn();
         }
         else
@@ -120,8 +118,9 @@ public class BattleSystem : MonoBehaviour
 
     void OnPlayerTurn()
     {
-        // Здесь должен быть вызов UI для выбора действия
-        // Пример: ShowPlayerActions();
+        uiManager.UpdateUnitUI(playerUnit);
+        uiManager.UpdateUnitUI(enemyUnit);
+        // Show player actions if needed
     }
 
     public void OnPlayerAttack()
@@ -129,60 +128,58 @@ public class BattleSystem : MonoBehaviour
         if (state != BattleState.PLAYERTURN) return;
         int damage = Mathf.Max(1, playerUnit.attack - enemyUnit.defense);
         enemyUnit.TakeDamage(damage);
-        // Здесь можно обновить UI
+        uiManager.UpdateUnitUI(enemyUnit);
         NextTurn();
     }
 
     public void OnPlayerDefend()
     {
         if (state != BattleState.PLAYERTURN) return;
-        // Пример: увеличиваем защиту на 1 ход (реализовать баффы позже)
+        // TODO: Добавить механику защиты (например, временно увеличить defense)
         NextTurn();
     }
 
     public void OnPlayerWait()
     {
         if (state != BattleState.PLAYERTURN) return;
-        // Пропуск хода
         NextTurn();
     }
 
-    bool[,] InvertOccupiedForUnit(Unit unit)
-    {
-        // Копия сетки, где клетка юнита считается свободной (чтобы он мог выйти из неё)
-        var occ = (bool[,])gridManager.GetOccupiedGrid().Clone();
-        occ[unit.gridPosition.x, unit.gridPosition.y] = false;
-        return occ;
-    }
-
-    bool IsAdjacent(Vector2Int a, Vector2Int b)
+    private bool IsAdjacent(Vector2Int a, Vector2Int b)
     {
         return Mathf.Abs(a.x - b.x) + Mathf.Abs(a.y - b.y) == 1;
     }
 
-    IEnumerator EnemyTurn()
+    private IEnumerator EnemyTurn()
     {
         yield return new WaitForSeconds(1f);
-        // AI: если враг рядом с игроком — атаковать
+
+        if (!playerUnit.IsAlive)
+        {
+            NextTurn();
+            yield break;
+        }
+
+        // Если враг рядом с игроком — атакует
         if (IsAdjacent(enemyUnit.gridPosition, playerUnit.gridPosition))
         {
             int damage = Mathf.Max(1, enemyUnit.attack - playerUnit.defense);
             playerUnit.TakeDamage(damage);
-            // TODO: обновить UI
+            uiManager.UpdateUnitUI(playerUnit);
         }
         else
         {
-            // Построить путь к игроку
-            var path = AStarPathfinder.FindPath(enemyUnit.gridPosition, playerUnit.gridPosition, InvertOccupiedForUnit(enemyUnit));
-            if (path.Count > 1)
+            // Поиск пути к игроку
+            var path = PathFindingHelper.FindPath(
+                gridManager.grid,
+                enemyUnit.gridPosition,
+                playerUnit.gridPosition
+            );
+            if (path.IsValid && path.Length > 1)
             {
-                // Освободить старую клетку
-                gridManager.SetCellOccupied(enemyUnit.gridPosition, false);
-                // Занять новую (следующую по пути)
                 Vector2Int nextCell = path[1];
-                gridManager.SetCellOccupied(nextCell, true);
-                //enemyUnit.MoveAlongPath(new List<Vector2Int> { nextCell });
-                enemyUnit.gridPosition = nextCell;
+                if (!gridManager.IsCellOccupied(nextCell))
+                    gridManager.MoveUnit(enemyUnit, nextCell);
             }
         }
         yield return new WaitForSeconds(1f);
@@ -191,6 +188,10 @@ public class BattleSystem : MonoBehaviour
 
     void OnBattleEnd(bool playerWon)
     {
-        // Вызов UI: победа/поражение
+        // TODO: Вывести UI победы/поражения
+        if (playerWon)
+            Debug.Log("Игрок победил!");
+        else
+            Debug.Log("Игрок проиграл!");
     }
 }

@@ -110,3 +110,4 @@ MonoBehaviour:
   defense: 5
   agility: 4
   luck: 3
+  gridPosition: {x: 0, y: 0}

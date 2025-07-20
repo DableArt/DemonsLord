@@ -25,8 +25,19 @@ public class UIManager : MonoBehaviour
         mpSlider.value = unit.currentMP;
         mpText.text = $"{unit.currentMP}/{unit.maxMP}";
         statsText.text = $"ATK: {unit.attack}  DEF: {unit.defense}\nAGI: {unit.agility}  LUK: {unit.luck}";
-        // TODO: добавить отображение эффектов и бонусов
-        effectsText.text = ""; // Заполнить при наличии эффектов
-        bonusText.text = "";   // Заполнить при наличии бонусов
+        effectsText.text = GetEffectsString(unit);
+        bonusText.text = GetBonusesString(unit);
     }
-} 
+
+    private string GetEffectsString(Unit unit)
+    {
+        // TODO: Реализация на основе системы эффектов
+        return "";
+    }
+
+    private string GetBonusesString(Unit unit)
+    {
+        // TODO: Реализация на основе системы бонусов
+        return "";
+    }
+}
