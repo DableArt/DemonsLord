@@ -54,10 +54,4 @@ public class Unit : MonoBehaviour
         currentMP += amount;
         if (currentMP > maxMP) currentMP = maxMP;
     }
-
-    public void SetPosition(Vector2Int newPosition)
-    {
-        gridPosition = newPosition;
-        transform.position = new Vector3(newPosition.x, newPosition.y, 0);
-    }
 }

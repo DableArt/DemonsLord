@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -5,7 +6,7 @@ public static class PathFindingHelper
 {
     public static Path FindPath(Grid grid, Vector2Int start, Vector2Int goal)
     {
-        if (GetCell(grid, start) == null || GetCell(grid, goal) == null)
+        if (grid.Get(start) == null || grid.Get(goal) == null)
             return new Path();
 
         var openSet = new PriorityQueue<Vector2Int>();
@@ -25,7 +26,7 @@ public static class PathFindingHelper
 
             foreach (var neighbor in GetNeighbors(current, grid))
             {
-                var cell = GetCell(grid, neighbor);
+                var cell = grid.Get(neighbor);
                 if (cell == null || cell.Occupied) continue;
 
                 int tentativeG = gScore[current] + 1;
@@ -56,15 +57,6 @@ public static class PathFindingHelper
             if (neighbor.x >= 0 && neighbor.x < grid.width && neighbor.y >= 0 && neighbor.y < grid.height)
                 yield return neighbor;
         }
-    }
-
-    private static Cell GetCell(Grid grid, Vector2Int pos)
-    {
-        int index = pos.y * grid.width + pos.x;
-        if (index < 0 || index >= grid.Cells.Length) return null;
-        var cell = grid.Cells[index];
-        if (cell == null || cell.Point != pos) return null;
-        return cell;
     }
 
     private static Path ReconstructPath(Dictionary<Vector2Int, Vector2Int> cameFrom, Vector2Int current)

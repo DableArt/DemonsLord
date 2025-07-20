@@ -1,47 +1,56 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
+using static UnityEngine.Rendering.DebugUI;
 
 public class GridManager : MonoBehaviour
 {
-    public Grid grid;
+    public int width = 5;
+    public int height = 5;
+    public CellWraper[] Cells;
+
     public UnityEvent<UnitMoveContext> OnUnitMove;
 
-    public void InitGrid(GridSO gridSO)
+    public Grid grid;
+
+    [Serializable]
+    public class CellWraper
     {
-        grid = new Grid(gridSO.width, gridSO.height, gridSO.Cells);
+        public Vector2Int pont;
+        public Cell Cell;
     }
+
+    private void OnValidate()
+    {
+        // валидация
+    }
+
 
     public bool IsCellOccupied(Vector2Int cell)
     {
-        if (cell.x < 0 || cell.x >= grid.width || cell.y < 0 || cell.y >= grid.height)
-            return true;
+        if(grid.IsWithinBounds(cell)) return true;
 
-        int index = cell.y * grid.width + cell.x;
-        return grid.Cells[index].Occupied;
+        if (grid.Cells.TryGetValue(cell, out var gridCell))
+        {
+            return gridCell.Occupied;
+        }
+        else
+        {
+            return false;
+        }
     }
 
     public void SetCellOccupied(Vector2Int cell, bool value)
     {
-        if (cell.x < 0 || cell.x >= grid.width || cell.y < 0 || cell.y >= grid.height)
+        if (grid.IsWithinBounds(cell))
             return;
 
-        int index = cell.y * grid.width + cell.x;
-        grid.Cells[index].Occupied = value;
-    }
-
-    public bool[,] GetOccupiedGrid()
-    {
-        bool[,] occupied = new bool[grid.width, grid.height];
-        for (int y = 0; y < grid.height; y++)
+        if(grid.Cells.TryGetValue(cell, out var gridCell))
         {
-            for (int x = 0; x < grid.width; x++)
-            {
-                int idx = y * grid.width + x;
-                occupied[x, y] = grid.Cells[idx].Occupied;
-            }
+            gridCell.Occupied = value;
         }
-        return occupied;
     }
 
     public void MoveUnit(Unit unit, Vector2Int to)
@@ -50,7 +59,6 @@ public class GridManager : MonoBehaviour
         if (from == to || IsCellOccupied(to)) return;
         SetCellOccupied(from, false);
         SetCellOccupied(to, true);
-        unit.SetPosition(to);
 
         OnUnitMove?.Invoke(new UnitMoveContext(unit, from, to));
     }
@@ -61,5 +69,10 @@ public class GridManager : MonoBehaviour
             return false;
         MoveUnit(unit, to);
         return true;
+    }
+
+    private void Start()
+    {
+        grid = new(width, height, Cells.Select(item => new KeyValuePair<Vector2Int, Cell>(item.pont, item.Cell)));
     }
 }

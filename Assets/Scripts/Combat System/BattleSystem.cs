@@ -13,7 +13,7 @@ public class BattleSystem : MonoBehaviour
     private Queue<Unit> turnQueue = new Queue<Unit>();
 
     public GridManager gridManager;
-    public UIManager uiManager;
+ //   public UIManager uiManager;
     private Unit selectedUnit;
 
     void Start()
@@ -51,7 +51,7 @@ public class BattleSystem : MonoBehaviour
                 if (path.IsValid && path.Length > 1)
                 {
                     gridManager.MoveUnit(selectedUnit, path.End);
-                    uiManager.UpdateUnitUI(selectedUnit);
+                   // uiManager.UpdateUnitUI(selectedUnit);
                     selectedUnit = null;
                     NextTurn();
                     return;
@@ -118,8 +118,8 @@ public class BattleSystem : MonoBehaviour
 
     void OnPlayerTurn()
     {
-        uiManager.UpdateUnitUI(playerUnit);
-        uiManager.UpdateUnitUI(enemyUnit);
+       // uiManager.UpdateUnitUI(playerUnit);
+       // uiManager.UpdateUnitUI(enemyUnit);
         // Show player actions if needed
     }
 
@@ -128,7 +128,7 @@ public class BattleSystem : MonoBehaviour
         if (state != BattleState.PLAYERTURN) return;
         int damage = Mathf.Max(1, playerUnit.attack - enemyUnit.defense);
         enemyUnit.TakeDamage(damage);
-        uiManager.UpdateUnitUI(enemyUnit);
+        //uiManager.UpdateUnitUI(enemyUnit);
         NextTurn();
     }
 
@@ -165,7 +165,7 @@ public class BattleSystem : MonoBehaviour
         {
             int damage = Mathf.Max(1, enemyUnit.attack - playerUnit.defense);
             playerUnit.TakeDamage(damage);
-            uiManager.UpdateUnitUI(playerUnit);
+            //uiManager.UpdateUnitUI(playerUnit);
         }
         else
         {
