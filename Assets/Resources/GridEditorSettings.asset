@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 801b19724f47c204db81442909369d3f, type: 3}
+  m_Name: GridEditorSettings
+  m_EditorClassIdentifier: 
+  gridDrawRadius: 6
+  maxAlpha: 1
+  minAlpha: 0
+  gridLineWidth: 6
+  highlightOutlineWidth: 6
+  gridColor: {r: 1, g: 0.9622972, b: 0, a: 1}
+  blockedGridColor: {r: 1, g: 0, b: 0, a: 1}
+  highlightFill: {r: 0.2796451, g: 1, b: 0, a: 0.33}
+  highlightOutline: {r: 0.4104433, g: 1, b: 0, a: 1}
+  blockedHighlightOutline: {r: 1, g: 0, b: 0.9815197, a: 1}

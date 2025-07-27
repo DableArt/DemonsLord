@@ -12,7 +12,6 @@ public class BattleSystem : MonoBehaviour
     public BattleState state;
     private Queue<Unit> turnQueue = new Queue<Unit>();
 
-    public GridManager gridManager;
  //   public UIManager uiManager;
     private Unit selectedUnit;
 
@@ -32,40 +31,6 @@ public class BattleSystem : MonoBehaviour
 
     void HandlePlayerInput()
     {
-        if (Input.GetMouseButtonDown(0))
-        {
-            Vector3 mouseWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            Vector2Int cell = new Vector2Int(Mathf.RoundToInt(mouseWorld.x), Mathf.RoundToInt(mouseWorld.y));
-
-            if (playerUnit.gridPosition == cell)
-            {
-                selectedUnit = playerUnit;
-                // TODO: Подсветка
-                return;
-            }
-            if (selectedUnit != null && playerUnit == selectedUnit)
-            {
-                if (gridManager.IsCellOccupied(cell)) return;
-                var path = PathFindingHelper.FindPath(gridManager.grid, selectedUnit.gridPosition, cell);
-
-                if (path.IsValid && path.Length > 1)
-                {
-                    gridManager.MoveUnit(selectedUnit, path.End);
-                   // uiManager.UpdateUnitUI(selectedUnit);
-                    selectedUnit = null;
-                    NextTurn();
-                    return;
-                }
-            }
-            if (selectedUnit != null && cell == enemyUnit.gridPosition)
-            {
-                if (IsAdjacent(selectedUnit.gridPosition, cell))
-                {
-                    OnPlayerAttack();
-                    selectedUnit = null;
-                }
-            }
-        }
     }
 
     void SetupBattle()
@@ -89,31 +54,6 @@ public class BattleSystem : MonoBehaviour
 
     void NextTurn()
     {
-        if (!playerUnit.IsAlive)
-        {
-            state = BattleState.LOST;
-            OnBattleEnd(false);
-            return;
-        }
-        if (!enemyUnit.IsAlive)
-        {
-            state = BattleState.WON;
-            OnBattleEnd(true);
-            return;
-        }
-        Unit current = turnQueue.Dequeue();
-        turnQueue.Enqueue(current);
-        if (current == playerUnit)
-        {
-            state = BattleState.PLAYERTURN;
-            selectedUnit = null;
-            OnPlayerTurn();
-        }
-        else
-        {
-            state = BattleState.ENEMYTURN;
-            StartCoroutine(EnemyTurn());
-        }
     }
 
     void OnPlayerTurn()
@@ -148,42 +88,6 @@ public class BattleSystem : MonoBehaviour
     private bool IsAdjacent(Vector2Int a, Vector2Int b)
     {
         return Mathf.Abs(a.x - b.x) + Mathf.Abs(a.y - b.y) == 1;
-    }
-
-    private IEnumerator EnemyTurn()
-    {
-        yield return new WaitForSeconds(1f);
-
-        if (!playerUnit.IsAlive)
-        {
-            NextTurn();
-            yield break;
-        }
-
-        // Если враг рядом с игроком — атакует
-        if (IsAdjacent(enemyUnit.gridPosition, playerUnit.gridPosition))
-        {
-            int damage = Mathf.Max(1, enemyUnit.attack - playerUnit.defense);
-            playerUnit.TakeDamage(damage);
-            //uiManager.UpdateUnitUI(playerUnit);
-        }
-        else
-        {
-            // Поиск пути к игроку
-            var path = PathFindingHelper.FindPath(
-                gridManager.grid,
-                enemyUnit.gridPosition,
-                playerUnit.gridPosition
-            );
-            if (path.IsValid && path.Length > 1)
-            {
-                Vector2Int nextCell = path[1];
-                if (!gridManager.IsCellOccupied(nextCell))
-                    gridManager.MoveUnit(enemyUnit, nextCell);
-            }
-        }
-        yield return new WaitForSeconds(1f);
-        NextTurn();
     }
 
     void OnBattleEnd(bool playerWon)
