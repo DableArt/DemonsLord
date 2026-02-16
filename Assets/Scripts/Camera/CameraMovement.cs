@@ -2,14 +2,40 @@
 
 public class CameraMovement : MonoBehaviour
 {
-    ​public Transform target;
-    public float smoothSpeed = 5f,
-    overSpeed; public Vector3 offset, oldPos;
-    private void LateUpdate()
+    public Transform target;
+    public float smoothSpeed = 5f;
+    public Vector3 offset;
+
+    public float lookAheadStrength = 2f;
+
+    private Vector3 lastTargetPos;
+
+    void Start()
     {
-        ​ Vector3 delta = oldPos - target.position, desiredPos = target.position + offset + (delta * overSpeed);
-        transform.position = Vector3.Lerp(transform.position, desiredPos, smoothSpeed * Time.deltaTime); 
-        oldPos = target.position;
+        lastTargetPos = target.position;
     }
-    ​
+
+    void LateUpdate()
+    {
+        if (target == null) return;
+        Vector3 currentTargetPos = target.position;
+
+
+        Vector3 delta = currentTargetPos - lastTargetPos;
+
+
+        Vector3 lookAhead = delta * lookAheadStrength;
+
+
+        Vector3 desiredPos = currentTargetPos + offset + lookAhead;
+
+        transform.position = Vector3.Lerp(
+            transform.position,
+            desiredPos,
+            smoothSpeed * Time.deltaTime
+        );
+
+
+        lastTargetPos = currentTargetPos;
+    }
 }

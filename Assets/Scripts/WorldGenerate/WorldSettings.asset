@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2ee66893a7cac6e4cb8fa7cc120583a4, type: 3}
+  m_Name: WorldSettings
+  m_EditorClassIdentifier: Assembly-CSharp::WorldSettings
+  chunkSize: 32
+  pixelsPerUnit: 16
+  loadRadiusChunks: 2
+  unloadRadiusChunks: 4
+  seed: 12345
+  noiseScale: 0.06
+  waterThreshold: 0.45
+  groundTile: {fileID: 11400000, guid: fa41c23ac90394f4c897646ab1062f60, type: 2}
+  waterTile: {fileID: 11400000, guid: 8c31160c155d6524e8f51e14b1e33f5d, type: 2}
