@@ -21,14 +21,14 @@ public class Chunk : MonoBehaviour
 
     private void CreateTilemaps()
     {
+        // Grid is required so Tilemap children can calculate tile positions and render correctly
+        gameObject.AddComponent<Grid>();
+
         // Ground tilemap
         groundMap = CreateTilemapChild("Ground", addCollider: false);
 
-        // Water tilemap + collider
+        // Water tilemap + collider (water tile Collider Type must be Sprite or Grid in the tile asset)
         waterMap = CreateTilemapChild("Water", addCollider: true);
-
-        // Важно: у waterTile в Inspector должен быть Collider Type = Grid
-        // (для RuleTile/Tile тоже работает)
     }
 
     private Tilemap CreateTilemapChild(string n, bool addCollider)
@@ -68,7 +68,7 @@ public class Chunk : MonoBehaviour
 
         int s = settings.chunkSize;
 
-        // заполняем локальные координаты тайлов (0..s-1)
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ (0..s-1)
         for (int y = 0; y < s; y++)
         {
             for (int x = 0; x < s; x++)
