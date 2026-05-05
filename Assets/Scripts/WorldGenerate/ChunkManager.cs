@@ -27,8 +27,6 @@ public class ChunkManager : MonoBehaviour
             return;
         }
 
-        Debug.Log($"ChunkManager tick. Loaded: {loaded.Count}");
-
         Vector2Int camChunk = WorldToChunkCoord(cam.transform.position);
 
         // 1) грузим вокруг камеры
