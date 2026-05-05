@@ -12,7 +12,10 @@ public class CameraMovement : MonoBehaviour
 
     void Start()
     {
-        lastTargetPos = target.position;
+        if (target != null)
+        {
+            lastTargetPos = target.position;
+        }
     }
 
     void LateUpdate()
