@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 18e9cb462273b0c42baf948c7dd388d2
+timeCreated: 1455665689
+licenseType: Store
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 59478
+  packageName: Open Source Pause Menu
+  packageVersion: 1.0
+  assetPath: Assets/Pause Menu Assets/Scripts/Utlities/Rotate.cs
+  uploadId: 123203

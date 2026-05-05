@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: b21ee160605ad8744a39d13726473d81
+timeCreated: 1454725009
+licenseType: Store
+TextScriptImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 59478
+  packageName: Open Source Pause Menu
+  packageVersion: 1.0
+  assetPath: Assets/Pause Menu Assets/Fonts/open-sans/Apache License.txt
+  uploadId: 123203

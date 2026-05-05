@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 01eeddf79c9e8364f8985ee99ae21747
+timeCreated: 1454775698
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 59478
+  packageName: Open Source Pause Menu
+  packageVersion: 1.0
+  assetPath: Assets/Pause Menu Assets/Animation/Quit Panel.controller
+  uploadId: 123203
