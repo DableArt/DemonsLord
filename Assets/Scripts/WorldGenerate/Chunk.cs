@@ -22,7 +22,7 @@ public class Chunk : MonoBehaviour
     private void CreateTilemaps()
     {
         // Grid is required so Tilemap children can calculate tile positions and render correctly
-        gameObject.AddComponent<Grid>();
+        gameObject.AddComponent<UnityEngine.Grid>();
 
         // Ground tilemap
         groundMap = CreateTilemapChild("Ground", addCollider: false);
