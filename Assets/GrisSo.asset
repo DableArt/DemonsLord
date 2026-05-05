@@ -12,12 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 0}
   m_Name: GrisSo
   m_EditorClassIdentifier: Assembly-CSharp::GridSO
-  width: 5
-  height: 5
   Cells:
-  - Point: {x: 0, y: 0}
-    Occupied: 0
-    Unit: {fileID: 0}
-  - Point: {x: 0, y: 0}
-    Occupied: 0
-    Unit: {fileID: 0}
+  - pont: {x: 0, y: 0}
+    Cell:
+      Occupied: 0
+      Unit: {fileID: 9042900422971951888, guid: 032c7c3e39aafbf4eac2b2c1e79bb1f3, type: 3}
