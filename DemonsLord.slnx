@@ -1,0 +1,7 @@
+﻿<Solution>
+  <Project Path="NavMeshPlusEditor.csproj" />
+  <Project Path="Assembly-CSharp.csproj" />
+  <Project Path="KITTY.csproj" />
+  <Project Path="KITTY-Editor.csproj" />
+  <Project Path="NavMeshPlus.csproj" />
+</Solution>
