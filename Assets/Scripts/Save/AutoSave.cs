@@ -5,7 +5,7 @@ public static class AutoSave
 {
     private const string SaveFileName = "autosave.json";
 
-    public static string SaveFilePath => Path.Combine(Application.persistentDataPath, SaveFileName);
+    public static string SaveFilePath => System.IO.Path.Combine(Application.persistentDataPath, SaveFileName);
 
     public static void Save(WorldSaveData data)
     {
