@@ -1,11 +1,13 @@
+using R3;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class PauseMenu : MonoBehaviour
 {
     [SerializeField] private GameObject pauseMenuCanvas;
+    [SerializeField] private PauseInputHandler inputHandler;
 
-    private bool isPaused = false;
+    private PauseMenuModel _model;
+    private readonly CompositeDisposable _disposables = new CompositeDisposable();
 
     private void Start()
     {
@@ -15,38 +17,47 @@ public class PauseMenu : MonoBehaviour
             enabled = false;
             return;
         }
+
+        if (inputHandler == null)
+        {
+            Debug.LogError("PauseMenu: inputHandler is not assigned!", this);
+            enabled = false;
+            return;
+        }
+
+        _model = new PauseMenuModel();
+
+        // Подписка на нажатие Esc — переключаем состояние паузы
+        inputHandler.OnEscapePressed
+            .Subscribe(_ => TogglePause())
+            .AddTo(_disposables);
+
+        // Реактивная привязка состояния к Canvas
+        _model.IsPaused
+            .Subscribe(isPaused =>
+            {
+                pauseMenuCanvas.SetActive(isPaused);
+                Time.timeScale = isPaused ? 0f : 1f;
+            })
+            .AddTo(_disposables);
+
+        // Убедиться, что меню закрыто при старте
         pauseMenuCanvas.SetActive(false);
     }
 
-    private void OnDestroy()
+    private void TogglePause()
     {
-        if (isPaused)
-            Time.timeScale = 1f;
-    }
-
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            if (isPaused)
-                ResumeGame();
-            else
-                PauseGame();
-        }
-    }
-
-    public void PauseGame()
-    {
-        pauseMenuCanvas.SetActive(true);
-        Time.timeScale = 0f;
-        isPaused = true;
+        _model.IsPaused.Value = !_model.IsPaused.Value;
     }
 
     public void ResumeGame()
     {
-        pauseMenuCanvas.SetActive(false);
-        Time.timeScale = 1f;
-        isPaused = false;
+        _model.IsPaused.Value = false;
+    }
+
+    public void PauseGame()
+    {
+        _model.IsPaused.Value = true;
     }
 
     public void QuitGame()
@@ -56,5 +67,14 @@ public class PauseMenu : MonoBehaviour
 #else
         Application.Quit();
 #endif
+    }
+
+    private void OnDestroy()
+    {
+        if (_model != null && _model.IsPaused.Value)
+            Time.timeScale = 1f;
+
+        _disposables.Dispose();
+        _model?.Dispose();
     }
 }
