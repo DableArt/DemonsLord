@@ -5,12 +5,12 @@ using UnityEngine.Tilemaps;
 public class WorldSettings : ScriptableObject
 {
     [Header("Chunk")]
-    public int chunkSize = 32;         // 32x32 тайла
-    public int pixelsPerUnit = 16;     // если нужно для расчётов (не обязательно)
+    public int chunkSize = 32;         // 32x32 пїЅпїЅпїЅпїЅпїЅ
+    public int pixelsPerUnit = 16;     // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ (пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ)
 
     [Header("Streaming")]
-    public int loadRadiusChunks = 2;   // сколько чанков вокруг камеры держим
-    public int unloadRadiusChunks = 4; // дальше — выгружаем
+    public int loadRadiusChunks = 2;   // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
+    public int unloadRadiusChunks = 4; // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 
     [Header("Noise")]
     public int seed = 12345;
@@ -20,4 +20,9 @@ public class WorldSettings : ScriptableObject
     [Header("Tiles")]
     public TileBase groundTile;
     public TileBase waterTile;
+
+    [Header("NPC Spawning")]
+    public GameObject[] npcPrefabs;
+    [Min(0)] public int npcMinCount = 3;
+    [Min(0)] public int npcMaxCount = 10;
 }

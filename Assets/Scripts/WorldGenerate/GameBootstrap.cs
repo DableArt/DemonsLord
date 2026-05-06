@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class GameBootstrap : MonoBehaviour
@@ -11,28 +12,19 @@ public class GameBootstrap : MonoBehaviour
 
     public Vector3 playerSpawnWorld = new Vector3(0, 0, 0);
 
-    public int preloadRadiusChunks = 2; // заранее сгенерировать квадрат вокруг спавна
+    public int preloadRadiusChunks = 2;
 
     IEnumerator Start()
     {
-        // 1) Лоадинг: предзагрузка чанков вокруг спавна
-        var spawnChunk = new Vector2Int(
-            Mathf.FloorToInt(playerSpawnWorld.x / settings.chunkSize),
-            Mathf.FloorToInt(playerSpawnWorld.y / settings.chunkSize)
-        );
-
-        // Временно “симулируем камеру” на спавне
         cam.transform.position = new Vector3(playerSpawnWorld.x, playerSpawnWorld.y, cam.transform.position.z);
 
-        // прогреть кадр, чтобы всё создалось
         yield return null;
 
-        // Прелоад: просто заставим ChunkManager прогрузить нужный радиус
         int oldLoadR = settings.loadRadiusChunks;
         settings.loadRadiusChunks = preloadRadiusChunks;
         chunkManager.cam = cam;
         chunkManager.enabled = true;
-        chunkManager.LateUpdate(); // ручной вызов один раз
+        chunkManager.LateUpdate();
         yield return null;
         settings.loadRadiusChunks = oldLoadR;
 
@@ -48,11 +40,49 @@ public class GameBootstrap : MonoBehaviour
 
         var player = playerObj.transform;
 
-
-        // 3) Камеру на игрока (если используешь свой CameraMovement)
         var follow = cam.GetComponent<CameraMovement>();
         if (follow != null) follow.target = player.transform;
 
-        // 4) Старт геймплея: теперь чанк-стриминг работает от реальной камеры
+        // Spawn NPCs at random ground positions
+        List<Vector3> npcPositions = SpawnNPCs();
+
+        // Auto-save world state to JSON
+        var saveData = new WorldSaveData
+        {
+            seed = settings.seed,
+            playerSpawnPosition = playerSpawnWorld,
+            npcPositions = npcPositions,
+            savedAt = System.DateTime.UtcNow.ToString("o")
+        };
+        AutoSave.Save(saveData);
+    }
+
+    private List<Vector3> SpawnNPCs()
+    {
+        var positions = new List<Vector3>();
+
+        if (settings.npcPrefabs == null || settings.npcPrefabs.Length == 0)
+            return positions;
+
+        int minCount = Mathf.Min(settings.npcMinCount, settings.npcMaxCount);
+        int maxCount = Mathf.Max(settings.npcMinCount, settings.npcMaxCount);
+        int count = Random.Range(minCount, maxCount + 1);
+        int spawnRadius = preloadRadiusChunks * settings.chunkSize;
+
+        for (int i = 0; i < count; i++)
+        {
+            GameObject prefab = settings.npcPrefabs[Random.Range(0, settings.npcPrefabs.Length)];
+            if (prefab == null) continue;
+
+            // Pick a random position within the preloaded world area, offset from player spawn
+            float rx = Random.Range(-spawnRadius, spawnRadius);
+            float ry = Random.Range(-spawnRadius, spawnRadius);
+            var pos = new Vector3(playerSpawnWorld.x + rx, playerSpawnWorld.y + ry, 0f);
+
+            Instantiate(prefab, pos, Quaternion.identity);
+            positions.Add(pos);
+        }
+
+        return positions;
     }
 }
