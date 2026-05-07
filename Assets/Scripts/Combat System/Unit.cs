@@ -14,6 +14,9 @@ public class Unit : MonoBehaviour
     public int agility;
     public int luck;
 
+    public bool isDefending;
+    public bool isFlying;
+
     public bool IsAlive => currentHP > 0;
 
     public Vector2Int gridPosition;
