@@ -14,7 +14,7 @@ public class ChunkManager : MonoBehaviour
         generator = new WorldGenerator(settings);
 
         if (cam == null)
-            cam = Camera.main; // или FindObjectOfType<Camera>()
+            cam = Camera.main; // пїЅпїЅпїЅ FindObjectOfType<Camera>()
     }
 
     public void LateUpdate()
@@ -28,19 +28,23 @@ public class ChunkManager : MonoBehaviour
         }
 
         Vector2Int camChunk = WorldToChunkCoord(cam.transform.position);
+        bool chunksChanged = false;
 
-        // 1) грузим вокруг камеры
+        // 1) пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
         int r = settings.loadRadiusChunks;
         for (int cy = camChunk.y - r; cy <= camChunk.y + r; cy++)
         {
             for (int cx = camChunk.x - r; cx <= camChunk.x + r; cx++)
             {
                 var c = new Vector2Int(cx, cy);
-                EnsureChunkLoaded(c);
+                if (EnsureChunkLoaded(c))
+                {
+                    chunksChanged = true;
+                }
             }
         }
 
-        // 2) выгружаем дальние
+        // 2) пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         int ur = settings.unloadRadiusChunks;
         var toRemove = new List<Vector2Int>();
         foreach (var kv in loaded)
@@ -55,25 +59,70 @@ public class ChunkManager : MonoBehaviour
         {
             Destroy(loaded[c].gameObject);
             loaded.Remove(c);
+            chunksChanged = true;
+        }
+
+        if (chunksChanged)
+        {
+            UpdateMinimapBounds();
         }
     }
 
-    private void EnsureChunkLoaded(Vector2Int coord)
+    private bool EnsureChunkLoaded(Vector2Int coord)
     {
-        if (loaded.ContainsKey(coord)) return;
+        if (loaded.ContainsKey(coord)) return false;
 
-        // создаём чанк
+        // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
         var go = new GameObject();
         go.transform.SetParent(transform, false);
 
         var chunk = go.AddComponent<Chunk>();
         chunk.Init(settings, coord);
 
-        // генерим данные и рисуем
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
         var data = generator.GenerateChunkData(coord);
         chunk.Render(data);
 
+        if (MinimapController.Instance != null)
+        {
+            MinimapController.Instance.RegisterChunk(coord, settings.chunkSize, data);
+        }
+
         loaded.Add(coord, chunk);
+        return true;
+    }
+
+    private void UpdateMinimapBounds()
+    {
+        if (MinimapController.Instance == null || loaded.Count == 0)
+        {
+            return;
+        }
+
+        bool initialized = false;
+        Vector2Int min = Vector2Int.zero;
+        Vector2Int max = Vector2Int.zero;
+
+        foreach (var coord in loaded.Keys)
+        {
+            if (!initialized)
+            {
+                min = coord;
+                max = coord;
+                initialized = true;
+                continue;
+            }
+
+            min.x = Mathf.Min(min.x, coord.x);
+            min.y = Mathf.Min(min.y, coord.y);
+            max.x = Mathf.Max(max.x, coord.x);
+            max.y = Mathf.Max(max.y, coord.y);
+        }
+
+        int chunkSize = settings.chunkSize;
+        Vector2 worldMin = new Vector2(min.x * chunkSize, min.y * chunkSize);
+        Vector2 worldMax = new Vector2((max.x + 1) * chunkSize, (max.y + 1) * chunkSize);
+        MinimapController.Instance.SetWorldBounds(worldMin, worldMax);
     }
 
     private Vector2Int WorldToChunkCoord(Vector3 worldPos)
