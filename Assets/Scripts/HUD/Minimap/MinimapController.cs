@@ -5,6 +5,8 @@ using UnityEngine.UI;
 
 public class MinimapController : MonoBehaviour
 {
+    private const float MinimumWorldSize = 0.001f;
+
     [Header("References")]
     [SerializeField] private RectTransform mapPanel;
     [SerializeField] private Transform playerTransform;
@@ -120,7 +122,9 @@ public class MinimapController : MonoBehaviour
     public void SetWorldBounds(Vector2 min, Vector2 max)
     {
         worldMin = min;
-        worldSize = new Vector2(Mathf.Max(0.001f, max.x - min.x), Mathf.Max(0.001f, max.y - min.y));
+        worldSize = new Vector2(
+            Mathf.Max(MinimumWorldSize, max.x - min.x),
+            Mathf.Max(MinimumWorldSize, max.y - min.y));
 
         Bounds bounds = new Bounds();
         bounds.SetMinMax(

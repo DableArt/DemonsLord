@@ -113,10 +113,10 @@ public class ChunkManager : MonoBehaviour
                 continue;
             }
 
-            if (coord.x < min.x) min.x = coord.x;
-            if (coord.y < min.y) min.y = coord.y;
-            if (coord.x > max.x) max.x = coord.x;
-            if (coord.y > max.y) max.y = coord.y;
+            min.x = Mathf.Min(min.x, coord.x);
+            min.y = Mathf.Min(min.y, coord.y);
+            max.x = Mathf.Max(max.x, coord.x);
+            max.y = Mathf.Max(max.y, coord.y);
         }
 
         int chunkSize = settings.chunkSize;
