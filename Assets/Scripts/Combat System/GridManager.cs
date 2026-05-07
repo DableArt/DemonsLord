@@ -1,83 +1,107 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
 
 public class GridManager : MonoBehaviour
 {
-    public int width = 5;
-    public int height = 5;
+    [Header("Grid Size")]
+    public int width = 12;
+    public int height = 8;
+
+    [Header("Visual")]
+    [Tooltip("Размер одной клетки в юнитах Unity")]
     public float cellSize = 1f;
-    public CellWraper[] Cells;
 
     public UnityEvent<UnitMoveContext> OnUnitMove;
 
-    public Grid grid;
+    public Grid grid { get; private set; }
 
-    [Serializable]
-    public class CellWraper
-    {
-        public Vector2Int pont;
-        public Cell Cell;
-    }
-
-    private void OnValidate()
-    {
-        // валидация
-    }
+    // ─── Инициализация ────────────────────────────────────────────────────────
 
     private void Awake()
     {
-        grid = new Grid(width, height, Cells.Select(item => new KeyValuePair<Vector2Int, Cell>(item.pont, item.Cell)));
+        BuildGrid();
     }
 
-    public Vector3 GetWorldPosition(Vector2Int cell) =>
-        transform.position + new Vector3(cell.x * cellSize + cellSize * 0.5f, cell.y * cellSize + cellSize * 0.5f, 0f);
-
-    public Vector2Int WorldToCell(Vector3 world)
+    /// <summary>Создаёт сетку автоматически — вручную ничего заполнять не нужно.</summary>
+    void BuildGrid()
     {
-        Vector3 local = world - transform.position;
-        return new Vector2Int(Mathf.FloorToInt(local.x / cellSize), Mathf.FloorToInt(local.y / cellSize));
+        var cells = new Dictionary<Vector2Int, Cell>();
+        for (int x = 0; x < width; x++)
+            for (int y = 0; y < height; y++)
+                cells[new Vector2Int(x, y)] = new Cell();
+
+        grid = new Grid(width, height, cells);
     }
 
+    // ─── Координаты ───────────────────────────────────────────────────────────
+
+    /// <summary>Мировые координаты → индекс клетки.</summary>
+    public Vector2Int WorldToCell(Vector3 worldPos)
+    {
+        Vector2 local = (Vector2)worldPos - (Vector2)transform.position;
+        return new Vector2Int(
+            Mathf.FloorToInt(local.x / cellSize),
+            Mathf.FloorToInt(local.y / cellSize)
+        );
+    }
+
+    /// <summary>Индекс клетки → центр клетки в мировых координатах.</summary>
+    public Vector3 GetWorldPosition(Vector2Int cell)
+    {
+        return transform.position + new Vector3(
+            cell.x * cellSize + cellSize * 0.5f,
+            cell.y * cellSize + cellSize * 0.5f,
+            0f
+        );
+    }
+
+    // ─── Логика занятости ─────────────────────────────────────────────────────
+
+    /// <summary>Занята ли клетка (или вне границ сетки).</summary>
     public bool IsCellOccupied(Vector2Int cell)
     {
+        // Клетки вне сетки считаются непроходимыми
         if (!grid.IsWithinBounds(cell)) return true;
 
         if (grid.Cells.TryGetValue(cell, out var gridCell))
-        {
             return gridCell.Occupied;
-        }
+
         return false;
     }
 
+    /// <summary>Установить флаг занятости клетки.</summary>
     public void SetCellOccupied(Vector2Int cell, bool value)
     {
         if (!grid.IsWithinBounds(cell)) return;
 
-        if (!grid.Cells.TryGetValue(cell, out var gridCell))
-        {
-            gridCell = new Cell();
-            grid.Cells[cell] = gridCell;
-        }
-        gridCell.Occupied = value;
+        if (grid.Cells.TryGetValue(cell, out var gridCell))
+            gridCell.Occupied = value;
     }
 
+    // ─── Перемещение юнита ────────────────────────────────────────────────────
+
+    /// <summary>Переместить юнита на клетку to. Обновляет gridPosition и занятость.</summary>
     public void MoveUnit(Unit unit, Vector2Int to)
     {
+        if (unit == null) return;
         var from = unit.gridPosition;
         if (from == to || IsCellOccupied(to)) return;
+
         SetCellOccupied(from, false);
         SetCellOccupied(to, true);
-        unit.gridPosition = to;
+        unit.gridPosition = to;                          // ← важно: обновляем позицию юнита
+
+        // Физически перемещаем GameObject
+        unit.transform.position = GetWorldPosition(to);
+
         OnUnitMove?.Invoke(new UnitMoveContext(unit, from, to));
     }
 
     public bool TryMove(Unit unit, Vector2Int to)
     {
-        if (IsCellOccupied(to) || unit.gridPosition == to)
-            return false;
+        if (IsCellOccupied(to) || unit.gridPosition == to) return false;
         MoveUnit(unit, to);
         return true;
     }
