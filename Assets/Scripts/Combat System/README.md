@@ -1,6 +1,6 @@
 # Combat System MVP
 
-Код боевой системы находится в `/home/runner/work/DemonsLord/DemonsLord/Assets/Scripts/Combat System`.
+Код боевой системы находится в `Assets/Scripts/Combat System`.
 
 ## Что есть в MVP
 
@@ -12,6 +12,13 @@
 - `UnitHighStatsData` — сериализуемые high stats (`HP`, `Mana`, `Ult`, `Level`) для JSON.
 - `CombatAutoSave` — autosave в `Application.persistentDataPath/combat_autosave.json`.
 - `BattleBackgroundDefinition` / `BattleBackgroundCatalog` / `BattleBackgroundView` — раздельные данные и view для biome background.
+
+Сокращения low stats:
+
+- `Ag` — Agility
+- `Luc` — Luck
+- `Int` — Intelligence
+- `Def` — Defense
 
 ## Старт боя из кода
 
