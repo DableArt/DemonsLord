@@ -332,17 +332,25 @@ namespace DemonsLord.CombatSystem
         {
             float playerLuc = PlayerUnit != null ? PlayerUnit.Luc : 0f;
             float npcLuc = NpcUnit != null ? NpcUnit.Luc : 0f;
-            float bonus = escapingSide == BattleSide.Player ? Tuning.PlayerEscapeBonus : 0f;
-            float escapingLuc = escapingSide == BattleSide.Player ? playerLuc : npcLuc;
-            float opposingLuc = escapingSide == BattleSide.Player ? npcLuc : playerLuc + Tuning.PlayerEscapeBonus;
-            float denominator = escapingLuc + opposingLuc + bonus;
 
-            if (denominator <= 0f)
+            if (escapingSide == BattleSide.Player)
+            {
+                float denominator = playerLuc + npcLuc + Tuning.PlayerEscapeBonus;
+                if (denominator <= 0f)
+                {
+                    return 0.5f;
+                }
+
+                return Mathf.Clamp01((playerLuc + Tuning.PlayerEscapeBonus) / denominator);
+            }
+
+            float npcDenominator = npcLuc + playerLuc + Tuning.PlayerEscapeBonus;
+            if (npcDenominator <= 0f)
             {
                 return 0.5f;
             }
 
-            return Mathf.Clamp01((escapingLuc + bonus) / denominator);
+            return Mathf.Clamp01(npcLuc / npcDenominator);
         }
 
         private Vector2Int? GetBestMoveTowards(UnitRuntime actor, UnitRuntime target)
