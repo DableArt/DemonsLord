@@ -25,4 +25,8 @@ public class WorldSettings : ScriptableObject
     public GameObject[] npcPrefabs;
     [Min(0)] public int npcMinCount = 3;
     [Min(0)] public int npcMaxCount = 10;
+
+    [Header("Trees")]
+    public GameObject treePrefab;
+    [Range(0f, 1f)] public float treeSpawnChance = 0.05f;
 }
