@@ -39,22 +39,37 @@ public class SummonSystem : MonoBehaviour
 
     private GameObject GetRandomCardPrefab()
     {
-        var availablePrefabs = new List<GameObject>();
+        var availablePrefabsCount = 0;
         for (int i = 0; i < cardPrefabs.Count; i++)
         {
             if (cardPrefabs[i] != null)
             {
-                availablePrefabs.Add(cardPrefabs[i]);
+                availablePrefabsCount++;
             }
         }
 
-        if (availablePrefabs.Count == 0)
+        if (availablePrefabsCount == 0)
         {
             return null;
         }
 
-        var randomIndex = Random.Range(0, availablePrefabs.Count);
-        return availablePrefabs[randomIndex];
+        var targetIndex = Random.Range(0, availablePrefabsCount);
+        for (int i = 0; i < cardPrefabs.Count; i++)
+        {
+            if (cardPrefabs[i] == null)
+            {
+                continue;
+            }
+
+            if (targetIndex == 0)
+            {
+                return cardPrefabs[i];
+            }
+
+            targetIndex--;
+        }
+
+        return null;
     }
 
     private IEnumerator SummonRoutine(GameObject cardPrefab)
