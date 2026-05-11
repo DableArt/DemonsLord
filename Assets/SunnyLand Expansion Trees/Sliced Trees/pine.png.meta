@@ -1,5 +1,12 @@
 fileFormatVersion: 2
-guid: d031a19d34fd122408ec69ec2415eacf
+guid: ac7d28ce47ebffc4c9a4f1f8f24eb385
+AssetOrigin:
+  serializedVersion: 1
+  productId: 237697
+  packageName: SunnyLand Expansion Pack Trees
+  packageVersion: 1.0
+  assetPath: Assets/SunnyLand Expansion Trees/Sliced Trees/pine.png
+  uploadId: 539361
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -45,10 +52,10 @@ TextureImporter:
   compressionQuality: 50
   spriteMode: 1
   spriteExtrude: 1
-  spriteMeshType: 0
-  alignment: 0
-  spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 16
+  spriteMeshType: 1
+  alignment: 9
+  spritePivot: {x: 0.5706237, y: 0.013407011}
+  spritePixelsToUnits: 32
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -72,7 +79,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -94,11 +101,24 @@ TextureImporter:
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 4
-    buildTarget: WindowsStoreApps
+    buildTarget: Server
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
     textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WindowsStoreApps
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -113,8 +133,8 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 95a44102eaa11cb4ab016df59f7881a4
-    internalID: 0
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 1537655665
     vertices: []
     indices: 
     edges: []
@@ -122,35 +142,7 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable:
-      Bridges_0: 4419207245272849179
-      Bridges_1: -978938595932761890
-      Bridges_10: -3602347933649339817
-      Bridges_11: 3761576167961936120
-      Bridges_12: 8102311876266904689
-      Bridges_13: 7419103761710208350
-      Bridges_14: 1167405310055883050
-      Bridges_15: -2325498525974044729
-      Bridges_16: -4748258791055438362
-      Bridges_17: -1000398799335944427
-      Bridges_18: 7551350793846364490
-      Bridges_19: -1675032134624486066
-      Bridges_2: 4619552979010320299
-      Bridges_20: 6823825797905457947
-      Bridges_21: -6998540239343022904
-      Bridges_22: -4852479476045768825
-      Bridges_23: 6278053515679689107
-      Bridges_24: 5717534272316589883
-      Bridges_25: -8221928709733938011
-      Bridges_26: -9175580244413574692
-      Bridges_27: -2494720345927995531
-      Bridges_3: -7964094763856153742
-      Bridges_4: -5928713052716369325
-      Bridges_5: -2458347662786323051
-      Bridges_6: 502732440738137211
-      Bridges_7: -4276752969576645033
-      Bridges_8: 5169223617025914343
-      Bridges_9: -4847967973376863162
+    nameFileIdTable: {}
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
