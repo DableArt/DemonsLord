@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class SummonSystem : MonoBehaviour
 {
+    private const float FallbackCameraDepth = 10f;
+
     [SerializeField] private List<GameObject> cardPrefabs = new List<GameObject>();
     [SerializeField] private float summonCooldownTime = 3f;
     [SerializeField] private float animationDuration = 1f;
@@ -39,37 +41,26 @@ public class SummonSystem : MonoBehaviour
 
     private GameObject GetRandomCardPrefab()
     {
-        var availablePrefabsCount = 0;
+        GameObject selectedPrefab = null;
+        var validPrefabCount = 0;
+
         for (int i = 0; i < cardPrefabs.Count; i++)
         {
-            if (cardPrefabs[i] != null)
-            {
-                availablePrefabsCount++;
-            }
-        }
-
-        if (availablePrefabsCount == 0)
-        {
-            return null;
-        }
-
-        var targetIndex = Random.Range(0, availablePrefabsCount);
-        for (int i = 0; i < cardPrefabs.Count; i++)
-        {
-            if (cardPrefabs[i] == null)
+            var prefab = cardPrefabs[i];
+            if (prefab == null)
             {
                 continue;
             }
 
-            if (targetIndex == 0)
-            {
-                return cardPrefabs[i];
-            }
+            validPrefabCount++;
 
-            targetIndex--;
+            if (Random.Range(0, validPrefabCount) == 0)
+            {
+                selectedPrefab = prefab;
+            }
         }
 
-        return null;
+        return selectedPrefab;
     }
 
     private IEnumerator SummonRoutine(GameObject cardPrefab)
@@ -90,7 +81,7 @@ public class SummonSystem : MonoBehaviour
         var cameraToCardDepth = Mathf.Abs(summonCamera.transform.position.z - spawnedCard.transform.position.z);
         if (cameraToCardDepth < 0.01f)
         {
-            cameraToCardDepth = 10f;
+            cameraToCardDepth = FallbackCameraDepth;
         }
 
         var startPosition = summonCamera.ViewportToWorldPoint(new Vector3(0.5f, 0.1f, cameraToCardDepth));
