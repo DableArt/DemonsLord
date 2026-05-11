@@ -4,7 +4,8 @@ using UnityEngine;
 
 public class SummonSystem : MonoBehaviour
 {
-    private const float CardDistanceFromCamera = 1f;
+    private const float CardDistanceFromCamera = 2f;
+    private const float CardStartViewportYBelowScreen = -0.2f;
 
     [SerializeField] private List<GameObject> cardPrefabs = new List<GameObject>();
     [SerializeField] private float summonCooldownTime = 3f;
@@ -85,7 +86,7 @@ public class SummonSystem : MonoBehaviour
         var spawnedCard = Instantiate(cardPrefab, Vector3.zero, spawnRotation);
         var cameraToCardDepth = summonCamera.nearClipPlane + CardDistanceFromCamera;
 
-        var startPosition = summonCamera.ViewportToWorldPoint(new Vector3(0.5f, -0.2f, cameraToCardDepth));
+        var startPosition = summonCamera.ViewportToWorldPoint(new Vector3(0.5f, CardStartViewportYBelowScreen, cameraToCardDepth));
         var targetPosition = summonCamera.ViewportToWorldPoint(new Vector3(0.5f, 0.5f, cameraToCardDepth));
 
         spawnedCard.transform.position = startPosition;
