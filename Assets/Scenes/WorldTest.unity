@@ -522,7 +522,7 @@ MonoBehaviour:
   - {fileID: 3363070606303502570, guid: 29e08e4c2c85e8f4cb4bded31bf61196, type: 3}
   - {fileID: 3363070606303502570, guid: 97dc7d5b95627b246b9fe8aead50bdcd, type: 3}
   - {fileID: 3363070606303502570, guid: 2b11219cd22632b48b0ba21110b05452, type: 3}
-  summonCooldownTime: 5
+  summonCooldownTime: 500
   animationDuration: 2
 --- !u!1001 &905083148
 PrefabInstance:
