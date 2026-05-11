@@ -4,7 +4,8 @@ using UnityEngine;
 
 public class SummonSystem : MonoBehaviour
 {
-    private const float FallbackCameraDepth = 10f;
+    private const float CardDistanceFromCamera = 2f;
+    private const float CardStartViewportYBelowScreen = -0.2f;
 
     [SerializeField] private List<GameObject> cardPrefabs = new List<GameObject>();
     [SerializeField] private float summonCooldownTime = 3f;
@@ -13,9 +14,14 @@ public class SummonSystem : MonoBehaviour
     private bool _isSummoning;
     private float _nextSummonTime;
 
+    private void OnEnable()
+    {
+        _nextSummonTime = Time.time + summonCooldownTime;
+    }
+
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Time.time >= _nextSummonTime)
         {
             TriggerSummon();
         }
@@ -32,6 +38,7 @@ public class SummonSystem : MonoBehaviour
         if (prefab == null)
         {
             Debug.LogWarning("SummonSystem: No card prefabs assigned for summoning.", this);
+            _nextSummonTime = Time.time + summonCooldownTime;
             return;
         }
 
@@ -77,17 +84,10 @@ public class SummonSystem : MonoBehaviour
 
         var spawnRotation = Quaternion.Euler(0f, 180f, 0f);
         var spawnedCard = Instantiate(cardPrefab, Vector3.zero, spawnRotation);
+        var cameraToCardDepth = summonCamera.nearClipPlane + CardDistanceFromCamera;
 
-        var cameraToCardDepth = Mathf.Abs(summonCamera.transform.position.z - spawnedCard.transform.position.z);
-        if (cameraToCardDepth < 0.01f)
-        {
-            cameraToCardDepth = FallbackCameraDepth;
-        }
-
-        var startPosition = summonCamera.ViewportToWorldPoint(new Vector3(0.5f, 0.1f, cameraToCardDepth));
+        var startPosition = summonCamera.ViewportToWorldPoint(new Vector3(0.5f, CardStartViewportYBelowScreen, cameraToCardDepth));
         var targetPosition = summonCamera.ViewportToWorldPoint(new Vector3(0.5f, 0.5f, cameraToCardDepth));
-        startPosition.z = spawnedCard.transform.position.z;
-        targetPosition.z = spawnedCard.transform.position.z;
 
         spawnedCard.transform.position = startPosition;
 
