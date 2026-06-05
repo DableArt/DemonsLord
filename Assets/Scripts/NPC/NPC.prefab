@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 5441006153530750666}
   - component: {fileID: 3067686706587555333}
   - component: {fileID: 1933091007908752901}
+  - component: {fileID: 6965468782575805565}
   m_Layer: 0
   m_Name: NPC
   m_TagString: Untagged
@@ -198,3 +199,23 @@ MonoBehaviour:
   markerType: 1
   customIconId: 
   rotateWithTransform: 0
+--- !u!114 &6965468782575805565
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2614573099348411580}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c41f65003e8042346ac1f57626c7f5e1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BattleV2.Triggers.NpcBattleTrigger
+  battleSceneName: BattleSceneV2
+  enemyId: enemy
+  playerSpawn: {x: 1, y: 4}
+  enemySpawn: {x: 10, y: 4}
+  playerTag: Player
+  tileVisualProviderSource: {fileID: 0}
+  fallbackGroundSprite: {fileID: 0}
+  fallbackGroundVisualId: default
