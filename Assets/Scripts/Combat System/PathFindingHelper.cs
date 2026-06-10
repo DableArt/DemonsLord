@@ -1,12 +1,14 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public static class PathFindingHelper
 {
-    public static Path FindPath(Grid grid, Vector2Int start, Vector2Int goal)
+    public static Path FindPath(BattleGrid grid, Vector2Int start, Vector2Int goal, Unit unit = null)
     {
-        if (grid.Get(start) == null || grid.Get(goal) == null)
+        if (!grid.IsWithinBounds(start) || !grid.IsWithinBounds(goal))
+            return new Path();
+
+        if (!grid.IsPassable(goal))
             return new Path();
 
         var openSet = new PriorityQueue<Vector2Int>();
@@ -24,12 +26,17 @@ public static class PathFindingHelper
             if (current == goal)
                 return ReconstructPath(cameFrom, current);
 
-            foreach (var neighbor in GetNeighbors(current, grid))
+            foreach (var neighbor in grid.GetNeighbors(current))
             {
-                var cell = grid.Get(neighbor);
-                if (cell == null || cell.Occupied) continue;
+                if (!grid.IsPassable(neighbor) && neighbor != goal)
+                    continue;
 
-                int tentativeG = gScore[current] + 1;
+                int moveCost = grid.GetMovementCost(neighbor);
+
+                if (unit != null && unit.habitatType == UnitHabitatType.Air)
+                    moveCost = 1;
+
+                int tentativeG = gScore[current] + moveCost;
                 if (!gScore.ContainsKey(neighbor) || tentativeG < gScore[neighbor])
                 {
                     cameFrom[neighbor] = current;
@@ -40,23 +47,12 @@ public static class PathFindingHelper
                 }
             }
         }
-        return new Path(); // no path found
+        return new Path();
     }
 
     private static int Heuristic(Vector2Int a, Vector2Int b)
     {
         return Mathf.Abs(a.x - b.x) + Mathf.Abs(a.y - b.y);
-    }
-
-    private static IEnumerable<Vector2Int> GetNeighbors(Vector2Int current, Grid grid)
-    {
-        var dirs = new[] { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right };
-        foreach (var d in dirs)
-        {
-            var neighbor = current + d;
-            if (neighbor.x >= 0 && neighbor.x < grid.width && neighbor.y >= 0 && neighbor.y < grid.height)
-                yield return neighbor;
-        }
     }
 
     private static Path ReconstructPath(Dictionary<Vector2Int, Vector2Int> cameFrom, Vector2Int current)
