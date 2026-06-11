@@ -25,3 +25,5 @@ MonoBehaviour:
   - {fileID: 2614573099348411580, guid: 132e4f885a754244381f79699bdea0e5, type: 3}
   npcMinCount: 5
   npcMaxCount: 10
+  treePrefab: {fileID: 3817094280501267634, guid: 5cb6935f0039e7e4bae4ead6f248759e, type: 3}
+  treeSpawnChance: 0.193

@@ -28,6 +28,9 @@ public class NpcAi : MonoBehaviour
     private float stateTimer;
     private Vector3 targetPosition;
 
+    /// <summary>Name of the water tilemap child created by <see cref="Chunk"/>.</summary>
+    private const string WaterTilemapName = "Water";
+
     private void Start()
     {
         SetIdle();
@@ -102,14 +105,41 @@ public class NpcAi : MonoBehaviour
     {
         Vector3 center = areaCenter != null ? areaCenter.position : transform.position;
 
-        float randomX = Random.Range(-areaSize.x * 0.5f, areaSize.x * 0.5f);
-        float randomY = Random.Range(-areaSize.y * 0.5f, areaSize.y * 0.5f);
+        const int maxAttempts = 10;
+        for (int attempt = 0; attempt < maxAttempts; attempt++)
+        {
+            float randomX = Random.Range(-areaSize.x * 0.5f, areaSize.x * 0.5f);
+            float randomY = Random.Range(-areaSize.y * 0.5f, areaSize.y * 0.5f);
 
-        targetPosition = new Vector3(
-            center.x + randomX,
-            center.y + randomY,
-            transform.position.z
-        );
+            Vector3 candidate = new Vector3(
+                center.x + randomX,
+                center.y + randomY,
+                transform.position.z
+            );
+
+            if (!IsWaterPosition(candidate))
+            {
+                targetPosition = candidate;
+                return;
+            }
+        }
+
+        // Fallback: stay in place
+        targetPosition = transform.position;
+    }
+
+    /// <summary>
+    /// Returns true if the given world position overlaps a Water tilemap collider.
+    /// </summary>
+    private bool IsWaterPosition(Vector3 worldPos)
+    {
+        var hits = Physics2D.OverlapPointAll((Vector2)worldPos);
+        foreach (var hit in hits)
+        {
+            if (hit.gameObject.name == WaterTilemapName)
+                return true;
+        }
+        return false;
     }
 
     private void OnDrawGizmosSelected()

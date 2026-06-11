@@ -16,6 +16,13 @@ public class GameBootstrap : MonoBehaviour
 
     IEnumerator Start()
     {
+        // Ensure the WoodCounter singleton is present in the scene
+        if (WoodCounter.Instance == null)
+        {
+            var wcGO = new GameObject("WoodCounterManager");
+            wcGO.AddComponent<WoodCounter>();
+        }
+
         cam.transform.position = new Vector3(playerSpawnWorld.x, playerSpawnWorld.y, cam.transform.position.z);
 
         yield return null;
@@ -43,7 +50,7 @@ public class GameBootstrap : MonoBehaviour
         var follow = cam.GetComponent<CameraMovement>();
         if (follow != null) follow.target = player.transform;
 
-        // Spawn NPCs at random ground positions
+        // Spawn NPCs only on Ground tiles
         List<Vector3> npcPositions = SpawnNPCs();
 
         // Auto-save world state to JSON
@@ -69,15 +76,34 @@ public class GameBootstrap : MonoBehaviour
         int count = Random.Range(minCount, maxCount + 1);
         int spawnRadius = preloadRadiusChunks * settings.chunkSize;
 
+        // Reuse the same generator to validate tile types deterministically
+        var generator = new WorldGenerator(settings);
+
         for (int i = 0; i < count; i++)
         {
             GameObject prefab = settings.npcPrefabs[Random.Range(0, settings.npcPrefabs.Length)];
             if (prefab == null) continue;
 
-            // Pick a random position within the preloaded world area, offset from player spawn
-            float rx = Random.Range(-spawnRadius, spawnRadius);
-            float ry = Random.Range(-spawnRadius, spawnRadius);
-            var pos = new Vector3(playerSpawnWorld.x + rx, playerSpawnWorld.y + ry, 0f);
+            // Pick a random Ground position within the preloaded world area
+            const int maxAttempts = 20;
+            bool found = false;
+            Vector3 pos = Vector3.zero;
+
+            for (int attempt = 0; attempt < maxAttempts; attempt++)
+            {
+                float rx = Random.Range(-spawnRadius, spawnRadius);
+                float ry = Random.Range(-spawnRadius, spawnRadius);
+                Vector3 candidate = new Vector3(playerSpawnWorld.x + rx, playerSpawnWorld.y + ry, 0f);
+
+                if (generator.IsGroundTile(candidate))
+                {
+                    pos = candidate;
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found) continue;
 
             Instantiate(prefab, pos, Quaternion.identity);
             positions.Add(pos);

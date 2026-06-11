@@ -110,7 +110,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Bridges_24
+      name: Hero
       rect:
         serializedVersion: 2
         x: 0
@@ -162,7 +162,6 @@ TextureImporter:
       Bridges_21: -6998540239343022904
       Bridges_22: -4852479476045768825
       Bridges_23: 6278053515679689107
-      Bridges_24: 5717534272316589883
       Bridges_25: -8221928709733938011
       Bridges_26: -9175580244413574692
       Bridges_27: -2494720345927995531
@@ -173,6 +172,7 @@ TextureImporter:
       Bridges_7: -4276752969576645033
       Bridges_8: 5169223617025914343
       Bridges_9: -4847967973376863162
+      Hero: 5717534272316589883
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

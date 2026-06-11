@@ -11,7 +11,7 @@ TagManager:
   - Ground
   - Water
   - UI
-  - 
+  - Cards
   - 
   - 
   - 
@@ -44,8 +44,9 @@ TagManager:
   - name: New Layer 1
     uniqueID: 3347766365
     locked: 0
-  - name: New Layer 2
+  - name: Cards
     uniqueID: 1568189085
     locked: 0
   m_RenderingLayers:
   - Default
+  - Cards
