@@ -131,7 +131,7 @@ public class EnemyAI : MonoBehaviour
         if (!IsAdjacent(_unit.gridPosition, target.gridPosition)) return false;
 
         var posMod = DamageCalculator.GetPositionModifier(
-            _unit.gridPosition, target.gridPosition, _gridManager.grid);
+            _unit.gridPosition, target.gridPosition, _gridManager.grid, _enemySquad.units);
         bool isCrit = DamageCalculator.IsCriticalHit(_unit);
         int damage = DamageCalculator.CalculatePhysicalDamage(
             _unit, target, posMod, RangeType.Melee, isCrit);

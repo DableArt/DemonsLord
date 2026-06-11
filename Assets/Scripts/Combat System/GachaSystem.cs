@@ -82,6 +82,9 @@ public class GachaSystem : MonoBehaviour
 
         var vfx = unit.GetComponent<VfxTrigger>();
         if (vfx == null) unit.gameObject.AddComponent<VfxTrigger>();
+
+        var status = unit.GetComponent<StatusManager>();
+        if (status == null) unit.gameObject.AddComponent<StatusManager>();
     }
 
     public static float GetRankMultiplier(UnitRank rank)

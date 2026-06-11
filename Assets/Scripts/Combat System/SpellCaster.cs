@@ -70,6 +70,10 @@ public class SpellCaster : MonoBehaviour
                 vfx?.TriggerDamageDealt(damage);
             }
 
+            var statusManager = target.GetComponent<StatusManager>();
+            if (statusManager != null && spell.statusEffects.Count > 0)
+                statusManager.ApplyStatusFromSpell(spell, _unit.unitName);
+
             yield return new WaitForSeconds(0.3f);
         }
 

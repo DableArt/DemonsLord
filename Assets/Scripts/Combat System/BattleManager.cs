@@ -238,6 +238,31 @@ public class BattleManager : MonoBehaviour
             return;
         }
 
+        var statusManager = current.GetComponent<StatusManager>();
+        if (statusManager != null)
+        {
+            statusManager.OnTurnStart();
+
+            if (!current.IsAlive)
+            {
+                var deathVfx = current.GetComponent<VfxTrigger>();
+                deathVfx?.TriggerDeath();
+                turnManager.RemoveUnit(current);
+                gridManager.RemoveUnitFromGrid(current);
+                StartNextTurn();
+                return;
+            }
+
+            if (!statusManager.CanAct())
+            {
+                Debug.Log($"{current.unitName} пропускает ход (обездвижен)");
+                ClearUnitSelection();
+                turnManager.NextTurn();
+                StartNextTurn();
+                return;
+            }
+        }
+
         ClearUnitSelection();
 
         var abilityComp = current?.GetComponent<AbilityComponent>();
@@ -463,8 +488,9 @@ public class BattleManager : MonoBehaviour
     {
         isProcessingTurn = true;
 
+        var allies = playerSquad.units.Contains(attacker) ? playerSquad.units : enemySquad.units;
         var posMod = DamageCalculator.GetPositionModifier(
-            attacker.gridPosition, target.gridPosition, gridManager.grid);
+            attacker.gridPosition, target.gridPosition, gridManager.grid, allies);
         bool isCrit = DamageCalculator.IsCriticalHit(attacker);
         int damage = DamageCalculator.CalculatePhysicalDamage(
             attacker, target, posMod, RangeType.Melee, isCrit);
@@ -588,7 +614,7 @@ public class BattleManager : MonoBehaviour
                 if (IsAdjacent(enemyUnit.gridPosition, nearestPlayer.gridPosition))
                 {
                     var posMod = DamageCalculator.GetPositionModifier(
-                        enemyUnit.gridPosition, nearestPlayer.gridPosition, gridManager.grid);
+                        enemyUnit.gridPosition, nearestPlayer.gridPosition, gridManager.grid, enemySquad.units);
                     bool isCrit = DamageCalculator.IsCriticalHit(enemyUnit);
                     int damage = DamageCalculator.CalculatePhysicalDamage(
                         enemyUnit, nearestPlayer, posMod, RangeType.Melee, isCrit);

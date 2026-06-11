@@ -122,7 +122,7 @@ public class BossAI : EnemyAI
             {
                 int bonusDmg = Mathf.RoundToInt(_unit.attack * 0.5f);
                 var posMod = DamageCalculator.GetPositionModifier(
-                    _unit.gridPosition, target.gridPosition, _gridManager.grid);
+                    _unit.gridPosition, target.gridPosition, _gridManager.grid, _enemySquad.units);
                 int damage = DamageCalculator.CalculatePhysicalDamage(
                     _unit, target, posMod, RangeType.Melee, true);
                 damage += bonusDmg;
