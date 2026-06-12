@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b2c5d13999a59f142b38918dd64b1bbd, type: 3}
+  m_Name: Elf
+  m_EditorClassIdentifier: Assembly-CSharp::GachaUnitData
+  unitName: Hero_Elf
+  baseRank: 0
+  habitat: 0
+  size: 1
+  unitPrefab: {fileID: 7805438154684481411, guid: 4adc619e18ded04489b08fca59d45616, type: 3}
+  baseSTR: 5
+  baseAGI: 5
+  baseEND: 5
+  baseINT: 5
+  baseCHA: 5
+  baseLUK: 5
+  baseATK: 5
+  baseDEF: 5
+  baseHP: 50
+  baseMP: 20
+  defaultSpells: []
+  passiveAbilities: []
+  activeAbilities: []
+  ultimateAbility: {fileID: 0}
+  weightR: 50
+  weightSR: 30
+  weightSSR: 15
+  weightUR: 4
+  weightLR: 1

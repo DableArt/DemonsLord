@@ -33,6 +33,14 @@ public class BattleManager : MonoBehaviour
     void Start()
     {
         currentPhase = BattlePhase.Preparation;
+        if (playerSquad.AliveCount == 0 && enemySquad.AliveCount == 0)
+            return;
+        SetupBattle();
+    }
+
+    public void StartBattle()
+    {
+        currentPhase = BattlePhase.Preparation;
         SetupBattle();
     }
 
@@ -151,7 +159,11 @@ public class BattleManager : MonoBehaviour
 
     public void GenerateEnemySquadFromBiome(int count)
     {
-        if (battleBiome == null) return;
+        if (battleBiome == null)
+        {
+            Debug.LogError("GenerateEnemySquadFromBiome: battleBiome is not assigned in the inspector!");
+            return;
+        }
         var pool = battleBiome.commonEnemies;
         if (pool.Count == 0)
         {
@@ -197,6 +209,12 @@ public class BattleManager : MonoBehaviour
             if (!gridManager.grid.IsWithinBounds(pos)) continue;
             if (gridManager.CanOccupy(unit, pos))
                 gridManager.PlaceUnit(unit, pos);
+            var sr = unit.GetComponent<SpriteRenderer>();
+            if (sr != null)
+            {
+                sr.color = new Color(0.2f, 0.8f, 0.3f);
+                sr.sortingOrder = 10;
+            }
         }
 
         for (int i = 0; i < enemySquad.units.Count; i++)
@@ -207,6 +225,12 @@ public class BattleManager : MonoBehaviour
             if (!gridManager.grid.IsWithinBounds(pos)) continue;
             if (gridManager.CanOccupy(unit, pos))
                 gridManager.PlaceUnit(unit, pos);
+            var sr = unit.GetComponent<SpriteRenderer>();
+            if (sr != null)
+            {
+                sr.color = new Color(0.9f, 0.2f, 0.1f);
+                sr.sortingOrder = 10;
+            }
         }
     }
 
@@ -217,6 +241,13 @@ public class BattleManager : MonoBehaviour
         isSelectingTarget = false;
         selectedSpell = null;
 
+        if (!playerSquad.IsAlive && !enemySquad.IsAlive)
+        {
+            Debug.LogWarning("Обе стороны мертвы — ничья!");
+            currentPhase = BattlePhase.Lost;
+            OnBattleEnd(false);
+            return;
+        }
         if (!playerSquad.IsAlive)
         {
             currentPhase = BattlePhase.Lost;
@@ -333,10 +364,11 @@ public class BattleManager : MonoBehaviour
             return;
         }
 
+        Vector3 origin = gridManager.GridOrigin;
         Vector3 mouseWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         Vector2Int cell = new Vector2Int(
-            Mathf.RoundToInt(mouseWorld.x),
-            Mathf.RoundToInt(mouseWorld.y)
+            Mathf.FloorToInt(mouseWorld.x - origin.x),
+            Mathf.FloorToInt(mouseWorld.y - origin.y)
         );
 
         if (!gridManager.grid.IsWithinBounds(cell)) return;
@@ -397,10 +429,11 @@ public class BattleManager : MonoBehaviour
 
     void TryCastSpellAtMouse()
     {
+        Vector3 origin = gridManager.GridOrigin;
         Vector3 mouseWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         Vector2Int cell = new Vector2Int(
-            Mathf.RoundToInt(mouseWorld.x),
-            Mathf.RoundToInt(mouseWorld.y)
+            Mathf.FloorToInt(mouseWorld.x - origin.x),
+            Mathf.FloorToInt(mouseWorld.y - origin.y)
         );
 
         if (!gridManager.grid.IsWithinBounds(cell)) return;

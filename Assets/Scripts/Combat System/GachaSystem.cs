@@ -4,6 +4,7 @@ using UnityEngine;
 public class GachaSystem : MonoBehaviour
 {
     public List<GachaUnitData> availableUnits = new List<GachaUnitData>();
+    private static Sprite _unitCircleSprite;
 
     public Unit PullUnit(int level = 1)
     {
@@ -85,6 +86,35 @@ public class GachaSystem : MonoBehaviour
 
         var status = unit.GetComponent<StatusManager>();
         if (status == null) unit.gameObject.AddComponent<StatusManager>();
+
+        var sr = unit.GetComponent<SpriteRenderer>();
+        if (sr == null)
+        {
+            sr = unit.gameObject.AddComponent<SpriteRenderer>();
+            sr.sprite = GetCircleSprite();
+            sr.sortingOrder = 0;
+            sr.color = Color.white;
+        }
+    }
+
+    private static Sprite GetCircleSprite()
+    {
+        if (_unitCircleSprite != null) return _unitCircleSprite;
+        int size = 32;
+        var tex = new Texture2D(size, size);
+        var colors = new Color[size * size];
+        float cx = size / 2f, cy = size / 2f, r = size / 2f - 1;
+        for (int y = 0; y < size; y++)
+            for (int x = 0; x < size; x++)
+            {
+                float dx = x - cx, dy = y - cy;
+                colors[y * size + x] = (dx * dx + dy * dy <= r * r) ? Color.white : Color.clear;
+            }
+        tex.SetPixels(colors);
+        tex.Apply();
+        tex.filterMode = FilterMode.Point;
+        _unitCircleSprite = Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), size);
+        return _unitCircleSprite;
     }
 
     public static float GetRankMultiplier(UnitRank rank)
