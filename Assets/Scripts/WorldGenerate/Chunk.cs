@@ -1,13 +1,16 @@
 using UnityEngine;
 using UnityEngine.Tilemaps;
+
 public class Chunk : MonoBehaviour
 {
-        public Vector2Int Coord { get; private set; }
+    public Vector2Int Coord { get; private set; }
 
     private WorldSettings settings;
 
-    private Tilemap groundMap;
+    // Sorting order 0 — вода (рисуется ниже всего)
     private Tilemap waterMap;
+    // Sorting order 1 — земля/берег (рисуется поверх воды)
+    private Tilemap groundMap;
 
     private readonly System.Collections.Generic.List<GameObject> spawnedTrees =
         new System.Collections.Generic.List<GameObject>();
@@ -24,24 +27,24 @@ public class Chunk : MonoBehaviour
 
     private void CreateTilemaps()
     {
-        // Grid is required so Tilemap children can calculate tile positions and render correctly
+        // Grid обязателен для корректного расчёта позиций тайлов
         gameObject.AddComponent<UnityEngine.Grid>();
 
-        // Ground tilemap
-        groundMap = CreateTilemapChild("Ground", addCollider: false);
+        // Сначала создаём слой воды (sortingOrder = 0) — он под землёй
+        waterMap = CreateTilemapChild("Water", sortingOrder: 0, addCollider: true);
 
-        // Water tilemap + collider (water tile Collider Type must be Sprite or Grid in the tile asset)
-        waterMap = CreateTilemapChild("Water", addCollider: true);
+        // Затем слой земли (sortingOrder = 1) — поверх воды
+        groundMap = CreateTilemapChild("Ground", sortingOrder: 1, addCollider: false);
     }
 
-    private Tilemap CreateTilemapChild(string n, bool addCollider)
+    private Tilemap CreateTilemapChild(string n, int sortingOrder, bool addCollider)
     {
         var go = new GameObject(n);
         go.transform.SetParent(transform, false);
 
         var tilemap = go.AddComponent<Tilemap>();
         var renderer = go.AddComponent<TilemapRenderer>();
-        renderer.sortingOrder = (n == "Water") ? 1 : 0;
+        renderer.sortingOrder = sortingOrder;
 
         if (addCollider)
         {
@@ -64,9 +67,31 @@ public class Chunk : MonoBehaviour
         transform.position = new Vector3(Coord.x * s, Coord.y * s, 0f);
     }
 
+    /// <summary>
+    /// Проверяет, есть ли среди 8-связных соседей клетки (x, y) хоть одна вода.
+    /// Клетки за границей чанка считаются землёй (консервативный подход).
+    /// </summary>
+    private static bool HasWaterNeighbor(TileType[,] data, int x, int y)
+    {
+        int w = data.GetLength(0);
+        int h = data.GetLength(1);
+        for (int dy = -1; dy <= 1; dy++)
+        {
+            for (int dx = -1; dx <= 1; dx++)
+            {
+                if (dx == 0 && dy == 0) continue;
+                int nx = x + dx;
+                int ny = y + dy;
+                if (nx < 0 || nx >= w || ny < 0 || ny >= h) continue;
+                if (data[nx, ny] == TileType.Water) return true;
+            }
+        }
+        return false;
+    }
+
     public void Render(TileType[,] data)
     {
-        // Destroy previously spawned trees for this chunk
+        // Удаляем деревья предыдущего рендера
         foreach (var tree in spawnedTrees)
             if (tree != null) Destroy(tree);
         spawnedTrees.Clear();
@@ -77,7 +102,11 @@ public class Chunk : MonoBehaviour
         int s = settings.chunkSize;
         Vector3 chunkWorldPos = transform.position;
 
-        // ��������� ��������� ���������� ������ (0..s-1)
+        TileBase waterTile  = settings.GetWaterTile();
+        TileBase groundTile = settings.GetGroundTile();
+        TileBase shoreTile  = settings.GetShoreTile();
+
+        // Обходим локальные координаты чанка (0..s-1)
         for (int y = 0; y < s; y++)
         {
             for (int x = 0; x < s; x++)
@@ -86,23 +115,40 @@ public class Chunk : MonoBehaviour
 
                 if (data[x, y] == TileType.Water)
                 {
-                    waterMap.SetTile(pos, settings.waterTile);
+                    // Водная клетка — только на слое воды
+                    waterMap.SetTile(pos, waterTile);
                 }
                 else
                 {
-                    groundMap.SetTile(pos, settings.groundTile);
+                    // Земляная клетка — проверяем, граничит ли с водой
+                    bool isShore = HasWaterNeighbor(data, x, y);
 
-                    // Randomly spawn a tree on this Ground tile
-                    if (settings.treePrefab != null && Random.value < settings.treeSpawnChance)
+                    if (isShore)
                     {
-                        float wx = chunkWorldPos.x + x + 0.5f;
-                        float wy = chunkWorldPos.y + y + 0.5f;
-                        var treeObj = Instantiate(
-                            settings.treePrefab,
-                            new Vector3(wx, wy, 0f),
-                            Quaternion.identity,
-                            transform);
-                        spawnedTrees.Add(treeObj);
+                        // Береговая клетка: на слое воды кладём анимированную воду,
+                        // чтобы она просвечивала через полупрозрачные края берегового тайла.
+                        // На слое земли — береговой/переходный тайл (трава→камни).
+                        waterMap.SetTile(pos, waterTile);
+                        groundMap.SetTile(pos, shoreTile);
+                    }
+                    else
+                    {
+                        // Обычная земля вдали от воды
+                        groundMap.SetTile(pos, groundTile);
+
+                        // Деревья спавним только на обычной земле (не на берегу)
+                        if (settings.treePrefab != null
+                            && Random.value < settings.treeSpawnChance)
+                        {
+                            float wx = chunkWorldPos.x + x + 0.5f;
+                            float wy = chunkWorldPos.y + y + 0.5f;
+                            var treeObj = Instantiate(
+                                settings.treePrefab,
+                                new Vector3(wx, wy, 0f),
+                                Quaternion.identity,
+                                transform);
+                            spawnedTrees.Add(treeObj);
+                        }
                     }
                 }
             }
