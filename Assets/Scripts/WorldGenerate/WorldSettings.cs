@@ -25,10 +25,11 @@ public class WorldSettings : ScriptableObject
              "Сюда можно добавить несколько вариантов для будущей рандомизации или RuleTile.")]
     public TileBase[] groundTiles;
 
-    [Tooltip("Тайл берега/перехода (трава→камни) — отображается на земляных клетках, " +
-             "граничащих с водой. Если не задан, используется groundTiles[0]. " +
-             "Совместим с RuleTile для автоматического соединения береговой линии.")]
-    public TileBase shoreTile;
+    [Tooltip("Береговые/переходные тайлы по направлениям (трава→камни). " +
+             "Назначьте тайл для каждой стороны в инспекторе. " +
+             "При отсутствии конкретного тайла используется ShoreConfig.fallback, " +
+             "затем groundTiles[0]. Совместимо с RuleTile и AnimatedTile.")]
+    public ShoreConfig shoreTiles = new ShoreConfig();
 
     // -----------------------------------------------------------------------
     // Tiles — Water
@@ -58,11 +59,11 @@ public class WorldSettings : ScriptableObject
         (groundTiles != null && groundTiles.Length > 0) ? groundTiles[0] : null;
 
     /// <summary>
-    /// Возвращает береговой/переходный тайл.
-    /// Если <see cref="shoreTile"/> не задан — возвращает базовый тайл земли.
+    /// Возвращает резервный береговой тайл (без учёта направления).
+    /// Для направленного подбора используйте <see cref="shoreTiles"/>.<see cref="ShoreConfig.Resolve"/>.
     /// </summary>
     public TileBase GetShoreTile() =>
-        (shoreTile != null) ? shoreTile : GetGroundTile();
+        shoreTiles.fallback != null ? shoreTiles.fallback : GetGroundTile();
 
     /// <summary>
     /// Возвращает основной тайл воды (первый из массива) или null.

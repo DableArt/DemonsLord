@@ -68,25 +68,14 @@ public class Chunk : MonoBehaviour
     }
 
     /// <summary>
-    /// Проверяет, есть ли среди 8-связных соседей клетки (x, y) хоть одна вода.
+    /// Возвращает true, если клетка (x, y) является водой.
     /// Клетки за границей чанка считаются землёй (консервативный подход).
     /// </summary>
-    private static bool HasWaterNeighbor(TileType[,] data, int x, int y)
+    private static bool IsWater(TileType[,] data, int x, int y)
     {
-        int w = data.GetLength(0);
-        int h = data.GetLength(1);
-        for (int dy = -1; dy <= 1; dy++)
-        {
-            for (int dx = -1; dx <= 1; dx++)
-            {
-                if (dx == 0 && dy == 0) continue;
-                int nx = x + dx;
-                int ny = y + dy;
-                if (nx < 0 || nx >= w || ny < 0 || ny >= h) continue;
-                if (data[nx, ny] == TileType.Water) return true;
-            }
-        }
-        return false;
+        if (x < 0 || x >= data.GetLength(0) || y < 0 || y >= data.GetLength(1))
+            return false;
+        return data[x, y] == TileType.Water;
     }
 
     public void Render(TileType[,] data)
@@ -104,7 +93,6 @@ public class Chunk : MonoBehaviour
 
         TileBase waterTile  = settings.GetWaterTile();
         TileBase groundTile = settings.GetGroundTile();
-        TileBase shoreTile  = settings.GetShoreTile();
 
         // Обходим локальные координаты чанка (0..s-1)
         for (int y = 0; y < s; y++)
@@ -120,16 +108,35 @@ public class Chunk : MonoBehaviour
                 }
                 else
                 {
-                    // Земляная клетка — проверяем, граничит ли с водой
-                    bool isShore = HasWaterNeighbor(data, x, y);
+                    // Вычисляем водных соседей по всем 8 направлениям
+                    bool wTop         = IsWater(data, x,     y + 1);
+                    bool wBottom      = IsWater(data, x,     y - 1);
+                    bool wLeft        = IsWater(data, x - 1, y    );
+                    bool wRight       = IsWater(data, x + 1, y    );
+                    bool wTopLeft     = IsWater(data, x - 1, y + 1);
+                    bool wTopRight    = IsWater(data, x + 1, y + 1);
+                    bool wBottomLeft  = IsWater(data, x - 1, y - 1);
+                    bool wBottomRight = IsWater(data, x + 1, y - 1);
+
+                    bool isShore = wTop || wBottom || wLeft || wRight
+                                || wTopLeft || wTopRight || wBottomLeft || wBottomRight;
 
                     if (isShore)
                     {
-                        // Береговая клетка: на слое воды кладём анимированную воду,
+                        // Береговая клетка: под берегом кладём анимированную воду,
                         // чтобы она просвечивала через полупрозрачные края берегового тайла.
-                        // На слое земли — береговой/переходный тайл (трава→камни).
+                        // На слое земли — направленный береговой тайл.
+                        TileBase shoreResult = settings.shoreTiles.Resolve(
+                            wTop,    wBottom,
+                            wLeft,   wRight,
+                            wTopLeft,    wTopRight,
+                            wBottomLeft, wBottomRight);
+
+                        if (shoreResult == null)
+                            shoreResult = groundTile;
+
                         waterMap.SetTile(pos, waterTile);
-                        groundMap.SetTile(pos, shoreTile);
+                        groundMap.SetTile(pos, shoreResult);
                     }
                     else
                     {
