@@ -19,11 +19,32 @@ MonoBehaviour:
   seed: 0
   noiseScale: 0.06
   waterThreshold: 0.45
-  groundTile: {fileID: 11400000, guid: 42b49eb3fd622e14c9b5b27452ad107a, type: 2}
-  waterTile: {fileID: 11400000, guid: 8c31160c155d6524e8f51e14b1e33f5d, type: 2}
+  groundTiles:
+  - {fileID: 11400000, guid: c7745c89d698e26488428c42675736ef, type: 2}
+  - {fileID: 11400000, guid: 7a782fc0fa0b2cf499a049edc259e8ca, type: 2}
+  - {fileID: 11400000, guid: 3655cbf9a269dd147912b5256c084378, type: 2}
+  - {fileID: 11400000, guid: 64efdec905e58d34091c445755f278c0, type: 2}
+  - {fileID: 11400000, guid: 862b275f80df5d34cbe45a6fe4631009, type: 2}
+  - {fileID: 11400000, guid: ddbbad6354615ad47b9bfd8ace136b6a, type: 2}
+  - {fileID: 11400000, guid: 752759831985c9642b186550fda0e6b9, type: 2}
+  - {fileID: 11400000, guid: 1569e4878a7ddbe40b5f5750b73a625a, type: 2}
+  - {fileID: 11400000, guid: 488912d3b81c510489dc36c67b5ff967, type: 2}
+  - {fileID: 11400000, guid: 5c211b53e84d4d54bb875b2ad0d456cd, type: 2}
+  shoreTiles:
+    top: {fileID: 11400000, guid: 1c307d033e57b934aa69a920da6c03ce, type: 2}
+    bottom: {fileID: 11400000, guid: 2cc0e09d1e5def948953cfe7967f16d3, type: 2}
+    left: {fileID: 11400000, guid: d0cd41376e15e494eb2bb0576e2aeb7c, type: 2}
+    right: {fileID: 11400000, guid: 378d9fb465b77374b8bcbb9c25746ece, type: 2}
+    topLeft: {fileID: 11400000, guid: 9772fe8e68e5db14daa00e86aaaa4057, type: 2}
+    topRight: {fileID: 11400000, guid: 73595c8dd408e0142a46b6a49023f8d9, type: 2}
+    bottomLeft: {fileID: 11400000, guid: d6c34f3013f23a54797c1f9b33744790, type: 2}
+    bottomRight: {fileID: 11400000, guid: 17fbb8ad581b4c64e94440daaefd550a, type: 2}
+    fallback: {fileID: 11400000, guid: 73595c8dd408e0142a46b6a49023f8d9, type: 2}
+  waterTiles:
+  - {fileID: 11400000, guid: ce79036c45285bc4f91c8c1dbf85ab72, type: 2}
   npcPrefabs:
   - {fileID: 2614573099348411580, guid: 132e4f885a754244381f79699bdea0e5, type: 3}
   npcMinCount: 5
   npcMaxCount: 10
   treePrefab: {fileID: 3817094280501267634, guid: 5cb6935f0039e7e4bae4ead6f248759e, type: 3}
-  treeSpawnChance: 0.193
+  treeSpawnChance: 0.033
