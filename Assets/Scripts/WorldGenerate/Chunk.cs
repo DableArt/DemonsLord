@@ -9,6 +9,9 @@ public class Chunk : MonoBehaviour
     private Tilemap groundMap;
     private Tilemap waterMap;
 
+    private readonly System.Collections.Generic.List<GameObject> spawnedTrees =
+        new System.Collections.Generic.List<GameObject>();
+
     public void Init(WorldSettings settings, Vector2Int coord)
     {
         this.settings = settings;
@@ -63,10 +66,16 @@ public class Chunk : MonoBehaviour
 
     public void Render(TileType[,] data)
     {
+        // Destroy previously spawned trees for this chunk
+        foreach (var tree in spawnedTrees)
+            if (tree != null) Destroy(tree);
+        spawnedTrees.Clear();
+
         groundMap.ClearAllTiles();
         waterMap.ClearAllTiles();
 
         int s = settings.chunkSize;
+        Vector3 chunkWorldPos = transform.position;
 
         // ��������� ��������� ���������� ������ (0..s-1)
         for (int y = 0; y < s; y++)
@@ -76,9 +85,26 @@ public class Chunk : MonoBehaviour
                 var pos = new Vector3Int(x, y, 0);
 
                 if (data[x, y] == TileType.Water)
+                {
                     waterMap.SetTile(pos, settings.waterTile);
+                }
                 else
+                {
                     groundMap.SetTile(pos, settings.groundTile);
+
+                    // Randomly spawn a tree on this Ground tile
+                    if (settings.treePrefab != null && Random.value < settings.treeSpawnChance)
+                    {
+                        float wx = chunkWorldPos.x + x + 0.5f;
+                        float wy = chunkWorldPos.y + y + 0.5f;
+                        var treeObj = Instantiate(
+                            settings.treePrefab,
+                            new Vector3(wx, wy, 0f),
+                            Quaternion.identity,
+                            transform);
+                        spawnedTrees.Add(treeObj);
+                    }
+                }
             }
         }
     }

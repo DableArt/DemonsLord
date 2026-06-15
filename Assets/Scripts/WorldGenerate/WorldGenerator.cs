@@ -10,10 +10,32 @@ public class WorldGenerator
     public WorldGenerator(WorldSettings settings)
     {
         this.settings = settings;
-        // фиксированный оффсет от seed, чтобы мир был детерминированный
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ seed, пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         var rnd = new System.Random(settings.seed);
         seedOffsetX = rnd.Next(0, 100000);
         seedOffsetY = rnd.Next(0, 100000);
+    }
+
+    /// <summary>
+    /// Returns true when the world-space position lies on a Ground tile.
+    /// </summary>
+    public bool IsGroundTile(Vector3 worldPos)
+    {
+        int s = settings.chunkSize;
+        int chunkX = Mathf.FloorToInt(worldPos.x / s);
+        int chunkY = Mathf.FloorToInt(worldPos.y / s);
+
+        int localX = Mathf.FloorToInt(worldPos.x) - chunkX * s;
+        int localY = Mathf.FloorToInt(worldPos.y) - chunkY * s;
+
+        localX = Mathf.Clamp(localX, 0, s - 1);
+        localY = Mathf.Clamp(localY, 0, s - 1);
+
+        float nx = (chunkX * s + localX + seedOffsetX) * settings.noiseScale;
+        float ny = (chunkY * s + localY + seedOffsetY) * settings.noiseScale;
+        float n = Mathf.PerlinNoise(nx, ny);
+
+        return n >= settings.waterThreshold; // Ground
     }
 
     public TileType[,] GenerateChunkData(Vector2Int chunkCoord)
@@ -21,7 +43,7 @@ public class WorldGenerator
         int s = settings.chunkSize;
         var data = new TileType[s, s];
 
-        // мировая позиция тайла = координата чанка * размер + локальная координата
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ = пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ * пїЅпїЅпїЅпїЅпїЅпїЅ + пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         int baseX = chunkCoord.x * s;
         int baseY = chunkCoord.y * s;
 
