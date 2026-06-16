@@ -63,6 +63,7 @@ public class GachaSystem : MonoBehaviour
         unit.attack = Mathf.RoundToInt(data.baseATK * rankMult * levelMult);
         unit.defense = Mathf.RoundToInt(data.baseDEF * rankMult * levelMult);
         unit.attackRange = data.baseATKRange;
+        unit.moveRange = data.baseMoveRange;
 
         unit.maxHP = Mathf.RoundToInt(data.baseHP * rankMult * levelMult);
         unit.currentHP = unit.maxHP;

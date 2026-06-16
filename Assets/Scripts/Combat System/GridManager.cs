@@ -17,6 +17,68 @@ public class GridManager : MonoBehaviour
     public BattleGrid grid { get; private set; }
     public Vector3 GridOrigin => cellsParent != null ? cellsParent.position : Vector3.zero;
 
+    public Color highlightColor = Color.yellow;
+    private HashSet<Vector2Int> highlightedCells = new HashSet<Vector2Int>();
+
+    public void HighlightCells(IEnumerable<Vector2Int> cells)
+    {
+        ClearHighlights();
+        foreach (var pt in cells)
+        {
+            if (cellObjects.TryGetValue(pt, out var go))
+            {
+                highlightedCells.Add(pt);
+                go.GetComponent<SpriteRenderer>().color = highlightColor;
+            }
+        }
+    }
+
+    public void ClearHighlights()
+    {
+        foreach (var pt in highlightedCells)
+        {
+            if (cellObjects.TryGetValue(pt, out var go))
+            {
+                var cell = grid.GetCell(pt);
+                go.GetComponent<SpriteRenderer>().color = GetTerrainColor(cell.terrain);
+            }
+        }
+        highlightedCells.Clear();
+    }
+
+    public List<Vector2Int> GetReachableCells(Vector2Int from, int maxDist, Unit unit)
+    {
+        var result = new List<Vector2Int>();
+        if (grid == null || unit == null) return result;
+
+        var visited = new HashSet<Vector2Int> { from };
+        var queue = new Queue<(Vector2Int pos, int dist)>();
+        queue.Enqueue((from, 0));
+
+        int[] dx = { 0, 1, 0, -1 };
+        int[] dy = { 1, 0, -1, 0 };
+
+        while (queue.Count > 0)
+        {
+            var (pos, dist) = queue.Dequeue();
+            if (dist >= maxDist) continue;
+
+            for (int i = 0; i < 4; i++)
+            {
+                var next = new Vector2Int(pos.x + dx[i], pos.y + dy[i]);
+                if (visited.Contains(next)) continue;
+                if (!grid.IsWithinBounds(next)) continue;
+                if (!grid.IsPassable(next)) continue;
+                if (grid.IsOccupied(next)) continue;
+
+                visited.Add(next);
+                result.Add(next);
+                queue.Enqueue((next, dist + 1));
+            }
+        }
+        return result;
+    }
+
     [Serializable]
     public class GridCellData
     {

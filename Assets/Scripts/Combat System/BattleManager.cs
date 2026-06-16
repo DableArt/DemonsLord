@@ -310,11 +310,13 @@ public class BattleManager : MonoBehaviour
         {
             currentPhase = BattlePhase.PlayerTurn;
             SelectUnit(current);
+            ShowMoveRange(current);
             OnPlayerTurnStart();
         }
         else
         {
             currentPhase = BattlePhase.EnemyTurn;
+            gridManager.ClearHighlights();
             StartCoroutine(ExecuteEnemyTurn(current));
         }
     }
@@ -949,6 +951,13 @@ public class BattleManager : MonoBehaviour
         {
             ui.HideMagicPanel();
         }
+    }
+
+    void ShowMoveRange(Unit unit)
+    {
+        if (unit == null) return;
+        var cells = gridManager.GetReachableCells(unit.gridPosition, unit.moveRange, unit);
+        gridManager.HighlightCells(cells);
     }
 
     void OnBattleEnd(bool playerWon)

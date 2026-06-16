@@ -20,6 +20,7 @@ public class GachaUnitData : ScriptableObject
     public int baseATK = 10;
     public int baseDEF = 5;
     public int baseATKRange = 1;
+    public int baseMoveRange = 3;
     public int baseHP = 50;
     public int baseMP = 20;
 

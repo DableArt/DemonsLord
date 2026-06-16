@@ -21,6 +21,7 @@ public class Unit : MonoBehaviour
     public int attack;
     public int defense;
     public int attackRange = 1;
+    public int moveRange = 3;
 
     [Header("Experience")]
     public int currentExp;
@@ -62,7 +63,7 @@ public class Unit : MonoBehaviour
         UnitRank unitRank = UnitRank.R,
         UnitHabitatType unitHabitat = UnitHabitatType.Ground,
         UnitSize unitSize = UnitSize.Small,
-        int atkRange = 1)
+        int atkRange = 1, int mvRange = 3)
     {
         unitName = name;
         unitLevel = level;
@@ -78,6 +79,7 @@ public class Unit : MonoBehaviour
         habitatType = unitHabitat;
         size = unitSize;
         attackRange = atkRange;
+        moveRange = mvRange;
 
         StatCalculator.RecalculateUnitStats(this);
         currentHP = Mathf.Min(currentHP, maxHP);
