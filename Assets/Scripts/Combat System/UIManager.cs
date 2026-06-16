@@ -21,7 +21,6 @@ public class UIManager : MonoBehaviour
     public TMP_Text squadRosterText;
 
     [Header("Action Buttons")]
-    public Button btnAttack;
     public Button btnDefend;
     public Button btnWait;
     public Button btnEscape;
@@ -45,6 +44,7 @@ public class UIManager : MonoBehaviour
     [Header("Right Panel")]
     public TMP_Text alliesAliveText;
     public TMP_Text enemiesAliveText;
+    public TMP_Text enemyRosterText;
 
     private BattleManager _battleManager;
 
@@ -52,7 +52,6 @@ public class UIManager : MonoBehaviour
     {
         _battleManager = FindObjectOfType<BattleManager>();
 
-        btnAttack?.onClick.AddListener(() => _battleManager?.OnPlayerAttack());
         btnDefend?.onClick.AddListener(() => _battleManager?.OnPlayerDefend());
         btnWait?.onClick.AddListener(() => _battleManager?.OnPlayerWait());
         btnMagic?.onClick.AddListener(() => _battleManager?.OnPlayerSelectMagic());
@@ -145,6 +144,23 @@ public class UIManager : MonoBehaviour
         squadRosterText.text = roster;
     }
 
+    public void UpdateEnemySquadList(UnitSquad squad)
+    {
+        if (enemyRosterText == null) { Debug.LogWarning("UIManager: enemyRosterText not assigned"); return; }
+        if (squad == null) { enemyRosterText.text = "No enemies"; Debug.LogWarning("UIManager: enemySquad is null"); return; }
+        string roster = "<b>Enemies</b>\n";
+        for (int i = 0; i < squad.units.Count; i++)
+        {
+            var u = squad.units[i];
+            if (u == null) continue;
+            string hpInfo = u.IsAlive
+                ? $"<color=#{ColorToHex(GetHpColor(u))}>HP:{u.currentHP}/{u.maxHP}</color>"
+                : "<color=red>DEAD</color>";
+            roster += $"{i + 1}. {u.unitName} [{hpInfo}]\n";
+        }
+        enemyRosterText.text = roster;
+    }
+
     public void UpdateTurnOrderDisplay()
     {
         if (turnOrderUI == null || _battleManager?.turnManager == null) return;
@@ -200,7 +216,6 @@ public class UIManager : MonoBehaviour
 
     public void SetActionButtonsInteractable(bool value)
     {
-        if (btnAttack != null) btnAttack.interactable = value;
         if (btnDefend != null) btnDefend.interactable = value;
         if (btnWait != null) btnWait.interactable = value;
         if (btnEscape != null) btnEscape.interactable = value;

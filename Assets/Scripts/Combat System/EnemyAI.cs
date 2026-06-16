@@ -81,7 +81,7 @@ public class EnemyAI : MonoBehaviour
 
         int dist = GetDistance(_unit.gridPosition, target.gridPosition);
 
-        if (dist <= 1)
+        if (dist <= _unit.attackRange)
         {
             if (hpPercent > 0.4f)
             {
@@ -116,7 +116,8 @@ public class EnemyAI : MonoBehaviour
         if (flankPos.HasValue)
         {
             yield return MoveToPosition(flankPos.Value);
-            if (IsAdjacent(_unit.gridPosition, priorityTarget.gridPosition))
+            int flankDist = GetDistance(_unit.gridPosition, priorityTarget.gridPosition);
+            if (flankDist <= _unit.attackRange)
                 TryMeleeAttack(priorityTarget);
         }
         else
@@ -128,7 +129,8 @@ public class EnemyAI : MonoBehaviour
     protected bool TryMeleeAttack(Unit target)
     {
         if (target == null || !target.IsAlive) return false;
-        if (!IsAdjacent(_unit.gridPosition, target.gridPosition)) return false;
+        int dist = GetDistance(_unit.gridPosition, target.gridPosition);
+        if (dist > _unit.attackRange) return false;
 
         var posMod = DamageCalculator.GetPositionModifier(
             _unit.gridPosition, target.gridPosition, _gridManager.grid, _enemySquad.units);
@@ -447,8 +449,4 @@ public class EnemyAI : MonoBehaviour
         return Mathf.Abs(a.x - b.x) + Mathf.Abs(a.y - b.y);
     }
 
-    protected static bool IsAdjacent(Vector2Int a, Vector2Int b)
-    {
-        return GetDistance(a, b) == 1;
-    }
 }

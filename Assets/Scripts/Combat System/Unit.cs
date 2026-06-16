@@ -20,6 +20,7 @@ public class Unit : MonoBehaviour
     [Header("Combat Stats (derived)")]
     public int attack;
     public int defense;
+    public int attackRange = 1;
 
     [Header("Experience")]
     public int currentExp;
@@ -60,7 +61,8 @@ public class Unit : MonoBehaviour
         int hp, int mp,
         UnitRank unitRank = UnitRank.R,
         UnitHabitatType unitHabitat = UnitHabitatType.Ground,
-        UnitSize unitSize = UnitSize.Small)
+        UnitSize unitSize = UnitSize.Small,
+        int atkRange = 1)
     {
         unitName = name;
         unitLevel = level;
@@ -75,6 +77,7 @@ public class Unit : MonoBehaviour
         rank = unitRank;
         habitatType = unitHabitat;
         size = unitSize;
+        attackRange = atkRange;
 
         StatCalculator.RecalculateUnitStats(this);
         currentHP = Mathf.Min(currentHP, maxHP);
@@ -92,6 +95,11 @@ public class Unit : MonoBehaviour
     {
         currentHP -= dmg;
         if (currentHP < 0) currentHP = 0;
+        if (currentHP <= 0)
+        {
+            var sr = GetComponent<SpriteRenderer>();
+            if (sr != null) sr.color = Color.black;
+        }
         return currentHP <= 0;
     }
 

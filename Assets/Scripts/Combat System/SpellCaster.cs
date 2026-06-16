@@ -35,8 +35,10 @@ public class SpellCaster : MonoBehaviour
 
         var vfx = GetComponent<VfxTrigger>();
         vfx?.TriggerSpellCast(spell.spellName);
+        Debug.Log($"{_unit.unitName} кастует {spell.spellName} [MP:{_unit.currentMP}/{_unit.maxMP}] → клетка {targetCell}");
 
         List<Unit> targets = GetTargets(spell, targetCell, grid, enemySquad, playerSquad);
+        Debug.Log($"{spell.spellName}: найдено целей — {targets.Count}");
         int totalDamage = 0;
 
         foreach (var target in targets)
@@ -48,6 +50,7 @@ public class SpellCaster : MonoBehaviour
                 int healAmount = spell.power + Mathf.RoundToInt(_unit.intelligence * 0.5f);
                 target.Heal(healAmount);
                 totalDamage -= healAmount;
+                Debug.Log($"{spell.spellName} → {target.unitName}: +{healAmount} HP (теперь {target.currentHP}/{target.maxHP})");
 
                 FloatingDamage.ShowHeal(target, healAmount);
 
@@ -60,6 +63,7 @@ public class SpellCaster : MonoBehaviour
                 damage = BattleManager.ApplyBiomeDamage(_unit, damage);
                 target.TakeDamage(damage);
                 totalDamage += damage;
+                Debug.Log($"{spell.spellName} → {target.unitName}: {damage} урона (осталось {target.currentHP}/{target.maxHP})");
 
                 _unit.GainUltimateCharge(damage / 2);
 
@@ -72,12 +76,18 @@ public class SpellCaster : MonoBehaviour
 
             var statusManager = target.GetComponent<StatusManager>();
             if (statusManager != null && spell.statusEffects.Count > 0)
+            {
                 statusManager.ApplyStatusFromSpell(spell, _unit.unitName);
+                foreach (var se in spell.statusEffects)
+                    Debug.Log($"  статус {se.type} шанс {se.applyChance}% длит.{se.duration} сила {se.potency}");
+            }
 
             yield return new WaitForSeconds(0.3f);
         }
 
         onDamage?.Invoke(totalDamage);
+        if (targets.Count > 0)
+            Debug.Log($"{_unit.unitName} завершил каст {spell.spellName}, итоговый урон/хил: {totalDamage}");
     }
 
     private List<Unit> GetTargets(SpellBase spell, Vector2Int targetCell,

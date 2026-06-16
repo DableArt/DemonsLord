@@ -23,8 +23,9 @@ MonoBehaviour:
   baseINT: 5
   baseCHA: 5
   baseLUK: 5
-  baseATK: 5
+  baseATK: 7
   baseDEF: 5
+  baseATKRange: 2
   baseHP: 50
   baseMP: 20
   defaultSpells: []

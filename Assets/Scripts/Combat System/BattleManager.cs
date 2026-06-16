@@ -296,6 +296,13 @@ public class BattleManager : MonoBehaviour
 
         ClearUnitSelection();
 
+        string hpLog = $"=== Ход {turnManager.TurnNumber}: {current.unitName} ===";
+        foreach (var u in playerSquad.units)
+            if (u != null && u.IsAlive) hpLog += $" | {u.unitName} HP:{u.currentHP}/{u.maxHP}";
+        foreach (var u in enemySquad.units)
+            if (u != null && u.IsAlive) hpLog += $" | [{u.unitName} HP:{u.currentHP}/{u.maxHP}]";
+        Debug.Log(hpLog);
+
         var abilityComp = current?.GetComponent<AbilityComponent>();
         abilityComp?.OnTurnStart();
 
@@ -334,7 +341,7 @@ public class BattleManager : MonoBehaviour
                     return;
                 }
                 var unit = playerSquad.GetAliveUnitBySlot(i);
-                if (unit != null)
+                if (unit != null && unit == turnManager.CurrentUnit)
                 {
                     CancelMagicMode();
                     SelectUnit(unit);
@@ -352,6 +359,8 @@ public class BattleManager : MonoBehaviour
         {
             CancelMagicMode();
         }
+
+
     }
 
     void HandleMouseInput()
@@ -376,25 +385,28 @@ public class BattleManager : MonoBehaviour
         Unit clickedUnit = FindUnitAtCell(cell);
         if (clickedUnit != null)
         {
-            if (playerSquad.units.Contains(clickedUnit) && clickedUnit.IsAlive)
+            if (clickedUnit == turnManager.CurrentUnit && clickedUnit.IsAlive)
             {
                 CancelMagicMode();
                 SelectUnit(clickedUnit);
                 return;
             }
-            return;
         }
 
         var current = turnManager.CurrentUnit;
-        if (selectedUnit == current && current != null && current.IsAlive)
+        if (current != null && current.IsAlive)
         {
             if (gridManager.grid.IsOccupied(cell))
             {
                 var target = enemySquad.GetUnitAtPosition(cell);
-                if (target != null && IsAdjacent(current.gridPosition, cell))
+                if (target != null)
                 {
-                    ExecuteAttack(current, target);
-                    return;
+                    int dist = Mathf.Abs(current.gridPosition.x - cell.x) + Mathf.Abs(current.gridPosition.y - cell.y);
+                    if (dist <= current.attackRange)
+                    {
+                        ExecuteAttack(current, target);
+                        return;
+                    }
                 }
                 return;
             }
@@ -541,10 +553,8 @@ public class BattleManager : MonoBehaviour
 
         FloatingDamage.ShowDamage(target, damage, isCrit);
 
-        if (isCrit)
-            Debug.Log($"CRIT! {attacker.unitName} deals {damage} damage to {target.unitName}");
-        else
-            Debug.Log($"{attacker.unitName} deals {damage} damage to {target.unitName}");
+        string critStr = isCrit ? " КРИТ!" : "";
+        Debug.Log($"{attacker.unitName} → {target.unitName}: {damage} урона{critStr} (HP {target.currentHP}/{target.maxHP})");
 
         if (!target.IsAlive)
         {
@@ -577,6 +587,7 @@ public class BattleManager : MonoBehaviour
     IEnumerator ExecuteEnemyTurn(Unit enemyUnit)
     {
         isProcessingTurn = true;
+        OnTurnUIUpdate();
         yield return new WaitForSeconds(0.5f);
 
         if (!playerSquad.IsAlive)
@@ -598,6 +609,7 @@ public class BattleManager : MonoBehaviour
         yield return new WaitForSeconds(0.5f);
         isProcessingTurn = false;
         currentPhase = BattlePhase.Reaction;
+        OnTurnUIUpdate();
         turnManager.NextTurn();
         currentPhase = BattlePhase.RoundEnd;
         StartNextTurn();
@@ -644,7 +656,8 @@ public class BattleManager : MonoBehaviour
             var nearestPlayer = FindNearestPlayerUnit(enemyUnit.gridPosition);
             if (nearestPlayer != null)
             {
-                if (IsAdjacent(enemyUnit.gridPosition, nearestPlayer.gridPosition))
+                int dist = Mathf.Abs(enemyUnit.gridPosition.x - nearestPlayer.gridPosition.x) + Mathf.Abs(enemyUnit.gridPosition.y - nearestPlayer.gridPosition.y);
+                if (dist <= enemyUnit.attackRange)
                 {
                     var posMod = DamageCalculator.GetPositionModifier(
                         enemyUnit.gridPosition, nearestPlayer.gridPosition, gridManager.grid, enemySquad.units);
@@ -652,6 +665,7 @@ public class BattleManager : MonoBehaviour
                     int damage = DamageCalculator.CalculatePhysicalDamage(
                         enemyUnit, nearestPlayer, posMod, RangeType.Melee, isCrit);
                     damage = ApplyBiomeDamage(enemyUnit, damage);
+                    Debug.Log($"{enemyUnit.unitName} атакует {nearestPlayer.unitName}: {damage} урона{(isCrit ? " КРИТ!" : "")} (поз.мод:{posMod.multiplier:F2}+{posMod.flatBonus})");
 
                     nearestPlayer.TakeDamage(damage);
 
@@ -692,7 +706,10 @@ public class BattleManager : MonoBehaviour
                     {
                         Vector2Int nextCell = path[1];
                         if (gridManager.grid.IsWithinBounds(nextCell) && !gridManager.grid.IsOccupied(nextCell))
+                        {
                             gridManager.MoveUnit(enemyUnit, nextCell);
+                            Debug.Log($"{enemyUnit.unitName} движется к {nearestPlayer.unitName}: {enemyUnit.gridPosition} → {nextCell}");
+                        }
                     }
                 }
             }
@@ -722,9 +739,9 @@ public class BattleManager : MonoBehaviour
         var current = turnManager.CurrentUnit;
         if (current == null || !current.IsAlive) return;
 
-        var adjacentEnemy = FindAdjacentEnemy(current);
-        if (adjacentEnemy != null)
-            ExecuteAttack(current, adjacentEnemy);
+        var enemyInRange = FindEnemyInRange(current);
+        if (enemyInRange != null)
+            ExecuteAttack(current, enemyInRange);
     }
 
     public void OnPlayerDefend()
@@ -762,13 +779,17 @@ public class BattleManager : MonoBehaviour
         OnTurnUIUpdate();
     }
 
-    Unit FindAdjacentEnemy(Unit unit)
+    Unit FindEnemyInRange(Unit unit)
     {
         if (unit == null) return null;
         foreach (var enemy in enemySquad.units)
         {
-            if (enemy != null && enemy.IsAlive && IsAdjacent(unit.gridPosition, enemy.gridPosition))
-                return enemy;
+            if (enemy != null && enemy.IsAlive)
+            {
+                int dist = Mathf.Abs(unit.gridPosition.x - enemy.gridPosition.x) + Mathf.Abs(unit.gridPosition.y - enemy.gridPosition.y);
+                if (dist <= unit.attackRange)
+                    return enemy;
+            }
         }
         return null;
     }
@@ -913,6 +934,7 @@ public class BattleManager : MonoBehaviour
         );
 
         ui.UpdateSquadList(playerSquad, selectedUnit);
+        ui.UpdateEnemySquadList(enemySquad);
 
         if (isSelectingMagic)
         {
@@ -938,10 +960,5 @@ public class BattleManager : MonoBehaviour
         else
             Debug.Log("Игрок проиграл!");
         OnTurnUIUpdate();
-    }
-
-    bool IsAdjacent(Vector2Int a, Vector2Int b)
-    {
-        return Mathf.Abs(a.x - b.x) + Mathf.Abs(a.y - b.y) == 1;
     }
 }

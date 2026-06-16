@@ -17,8 +17,9 @@ public class GachaUnitData : ScriptableObject
     public int baseINT = 5;
     public int baseCHA = 5;
     public int baseLUK = 5;
-    public int baseATK = 5;
+    public int baseATK = 10;
     public int baseDEF = 5;
+    public int baseATKRange = 1;
     public int baseHP = 50;
     public int baseMP = 20;
 
