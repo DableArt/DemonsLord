@@ -1,4 +1,5 @@
 using UnityEngine;
+using WorldGenerate;
 
 public class NpcAi : MonoBehaviour
 {

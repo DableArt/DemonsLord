@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using R3;
 using UnityEngine;
 using UnityEngine.UI;
+using WorldGenerate;
 
 public class MinimapController : MonoBehaviour
 {
@@ -24,6 +25,7 @@ public class MinimapController : MonoBehaviour
     [Header("Map Style")]
     [SerializeField] private Color backgroundColor = new Color(0.1f, 0.1f, 0.1f, 0.8f);
     [SerializeField] private Color groundColor = new Color(0.35f, 0.28f, 0.2f, 1f);
+    [SerializeField] private Color shoreColor = new Color(0.7f, 0.75f, 0.5f, 1f);
     [SerializeField] private Color waterColor = new Color(0.15f, 0.35f, 0.55f, 1f);
 
     private readonly CompositeDisposable disposables = new CompositeDisposable();
@@ -134,7 +136,7 @@ public class MinimapController : MonoBehaviour
         WorldBounds.Value = bounds;
     }
 
-    public void RegisterChunk(Vector2Int coord, int chunkSize, TileType[,] data)
+    public void RegisterChunk(Vector2Int coord, int chunkSize, TerrainType[,] data)
     {
         if (data == null)
         {
@@ -365,7 +367,7 @@ public class MinimapController : MonoBehaviour
         backgroundImage.raycastTarget = false;
     }
 
-    private void DrawChunk(Vector2Int coord, int chunkSize, TileType[,] data)
+    private void DrawChunk(Vector2Int coord, int chunkSize, TerrainType[,] data)
     {
         if (mapTexture == null)
         {
@@ -390,7 +392,8 @@ public class MinimapController : MonoBehaviour
                     continue;
                 }
 
-                mapTexture.SetPixel(px, py, data[x, y] == TileType.Water ? waterColor : groundColor);
+                mapTexture.SetPixel(px, py, data[x, y] == TerrainType.Water ? waterColor : 
+                    data[x, y] == TerrainType.Shore ? shoreColor : groundColor);
             }
         }
     }
@@ -485,13 +488,13 @@ public class MinimapController : MonoBehaviour
 
     private readonly struct ChunkMapData
     {
-        public ChunkMapData(int chunkSize, TileType[,] data)
+        public ChunkMapData(int chunkSize, TerrainType[,] data)
         {
             ChunkSize = chunkSize;
             Data = data;
         }
 
         public int ChunkSize { get; }
-        public TileType[,] Data { get; }
+        public TerrainType[,] Data { get; }
     }
 }

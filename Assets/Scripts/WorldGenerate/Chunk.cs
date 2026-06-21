@@ -1,164 +1,175 @@
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
-public class Chunk : MonoBehaviour
+namespace WorldGenerate
 {
-    public Vector2Int Coord { get; private set; }
-
-    private WorldSettings settings;
-
-    // Sorting order 0 — вода (рисуется ниже всего)
-    private Tilemap waterMap;
-    // Sorting order 1 — земля/берег (рисуется поверх воды)
-    private Tilemap groundMap;
-
-    private readonly System.Collections.Generic.List<GameObject> spawnedTrees =
-        new System.Collections.Generic.List<GameObject>();
-
-    public void Init(WorldSettings settings, Vector2Int coord)
+    public class Chunk : MonoBehaviour
     {
-        this.settings = settings;
-        this.Coord = coord;
+        public Vector2Int Coord { get; private set; }
 
-        name = $"Chunk_{coord.x}_{coord.y}";
-        CreateTilemaps();
-        PositionChunk();
-    }
+        private WorldSettings settings;
+        private DualGridTileHelper tileHelper;
 
-    private void CreateTilemaps()
-    {
-        // Grid обязателен для корректного расчёта позиций тайлов
-        gameObject.AddComponent<UnityEngine.Grid>();
+        // Sorting order 0 — вода (рисуется ниже всего)
+        private Tilemap waterMap;
+        // Sorting order 1 — берег (рисуется поверх воды)
+        private Tilemap shoreMap;
+        // Sorting order 2 — земля (рисуется поверх воды и берега)
+        private Tilemap groundMap;
 
-        // Сначала создаём слой воды (sortingOrder = 0) — он под землёй
-        waterMap = CreateTilemapChild("Water", sortingOrder: 0, addCollider: true);
+        private readonly System.Collections.Generic.List<GameObject> spawnedTrees =
+            new System.Collections.Generic.List<GameObject>();
 
-        // Затем слой земли (sortingOrder = 1) — поверх воды
-        groundMap = CreateTilemapChild("Ground", sortingOrder: 1, addCollider: false);
-    }
-
-    private Tilemap CreateTilemapChild(string n, int sortingOrder, bool addCollider)
-    {
-        var go = new GameObject(n);
-        go.transform.SetParent(transform, false);
-
-        var tilemap = go.AddComponent<Tilemap>();
-        var renderer = go.AddComponent<TilemapRenderer>();
-        renderer.sortingOrder = sortingOrder;
-
-        if (addCollider)
+        public void Init(WorldSettings settings, DualGridTileHelper tileHelper, Vector2Int coord)
         {
-            var rb = go.AddComponent<Rigidbody2D>();
-            rb.bodyType = RigidbodyType2D.Static;
+            this.settings = settings;
+            this.Coord = coord;
+            this.tileHelper = tileHelper;
 
-            var col = go.AddComponent<TilemapCollider2D>();
-            col.compositeOperation = Collider2D.CompositeOperation.Merge;
-
-            var comp = go.AddComponent<CompositeCollider2D>();
-            comp.geometryType = CompositeCollider2D.GeometryType.Outlines;
+            name = $"Chunk_{coord.x}_{coord.y}";
+            CreateTilemaps();
+            PositionChunk();
         }
 
-        return tilemap;
-    }
-
-    private void PositionChunk()
-    {
-        int s = settings.chunkSize;
-        transform.position = new Vector3(Coord.x * s, Coord.y * s, 0f);
-    }
-
-    /// <summary>
-    /// Возвращает true, если клетка (x, y) является водой.
-    /// Клетки за границей чанка считаются землёй (консервативный подход).
-    /// </summary>
-    private static bool IsWater(TileType[,] data, int x, int y)
-    {
-        if (x < 0 || x >= data.GetLength(0) || y < 0 || y >= data.GetLength(1))
-            return false;
-        return data[x, y] == TileType.Water;
-    }
-
-    public void Render(TileType[,] data)
-    {
-        // Удаляем деревья предыдущего рендера
-        foreach (var tree in spawnedTrees)
-            if (tree != null) Destroy(tree);
-        spawnedTrees.Clear();
-
-        groundMap.ClearAllTiles();
-        waterMap.ClearAllTiles();
-
-        int s = settings.chunkSize;
-        Vector3 chunkWorldPos = transform.position;
-
-        TileBase waterTile  = settings.GetWaterTile();
-        TileBase groundTile = settings.GetGroundTile();
-
-        // Обходим локальные координаты чанка (0..s-1)
-        for (int y = 0; y < s; y++)
+        private void CreateTilemaps()
         {
-            for (int x = 0; x < s; x++)
+            // Grid обязателен для корректного расчёта позиций тайлов
+            gameObject.AddComponent<UnityEngine.Grid>();
+
+            // Сначала создаём слой воды (sortingOrder = 0) — он под землёй
+            waterMap = CreateTilemapChild("Water", sortingOrder: 0, addCollider: true);
+
+            // Береговая линия (sortingOrder = 1) над водой, но под землёй
+            shoreMap = CreateTilemapChild("Shore", sortingOrder: 1, addCollider: false); 
+
+            // Затем слой земли (sortingOrder = 2) — поверх воды и береговой линии
+            groundMap = CreateTilemapChild("Ground", sortingOrder: 2, addCollider: false); 
+        }
+
+        private Tilemap CreateTilemapChild(string n, int sortingOrder, bool addCollider)
+        {
+            var go = new GameObject(n);
+            go.transform.SetParent(transform, false);
+            //go.transform.localPosition = new Vector3(1f, 1f, 0);
+            go.transform.localPosition = Vector3.zero;
+
+            var tilemap = go.AddComponent<Tilemap>();
+            var renderer = go.AddComponent<TilemapRenderer>();
+            renderer.sortingOrder = sortingOrder;
+
+            if (addCollider)
             {
-                var pos = new Vector3Int(x, y, 0);
+                var rb = go.AddComponent<Rigidbody2D>();
+                rb.bodyType = RigidbodyType2D.Static;
 
-                if (data[x, y] == TileType.Water)
+                var col = go.AddComponent<TilemapCollider2D>();
+                col.compositeOperation = Collider2D.CompositeOperation.Merge;
+
+                var comp = go.AddComponent<CompositeCollider2D>();
+                comp.geometryType = CompositeCollider2D.GeometryType.Outlines;
+            }
+
+            return tilemap;
+        }
+
+        private void PositionChunk()
+        {
+            int s = settings.chunkSize;
+            transform.position = new Vector3(Coord.x * s, Coord.y * s, 0f);
+        }
+
+        public void Render(TerrainType[,] data, WorldGenerator generator)
+        {
+            ClearAll();
+
+            int s = settings.chunkSize;
+            Vector3 chunkWorldPos = transform.position;
+
+            for (int ry = 0; ry < s; ry++)
+            {
+                for (int rx = 0; rx < s; rx++)
                 {
-                    // Водная клетка — только на слое воды
-                    waterMap.SetTile(pos, waterTile);
-                }
-                else
-                {
-                    // Вычисляем водных соседей по всем 8 направлениям
-                    bool wTop         = IsWater(data, x,     y + 1);
-                    bool wBottom      = IsWater(data, x,     y - 1);
-                    bool wLeft        = IsWater(data, x - 1, y    );
-                    bool wRight       = IsWater(data, x + 1, y    );
-                    bool wTopLeft     = IsWater(data, x - 1, y + 1);
-                    bool wTopRight    = IsWater(data, x + 1, y + 1);
-                    bool wBottomLeft  = IsWater(data, x - 1, y - 1);
-                    bool wBottomRight = IsWater(data, x + 1, y - 1);
+                    var bl = data[rx,   ry];   // bottom-left
+                    var br = GetCorner(data, rx + 1, ry, generator);   // bottom-right
+                    var tl = GetCorner(data, rx, ry + 1, generator); // top-left
+                    var tr = GetCorner(data, rx + 1, ry + 1, generator); // top-right
 
-                    bool isShore = wTop || wBottom || wLeft || wRight
-                                || wTopLeft || wTopRight || wBottomLeft || wBottomRight;
+                    var entries = tileHelper.GetEntries(bl, br, tl, tr);
+                    var pos = new Vector3Int(rx, ry, 0);
 
-                    if (isShore)
+                    if (entries.TryGetValue(TerrainType.Water, out var wTile))
+                        waterMap.SetTile(pos, wTile);
+
+                    if (entries.TryGetValue(TerrainType.Shore, out var shTile))
+                        shoreMap.SetTile(pos, shTile);
+
+                    if (entries.TryGetValue(TerrainType.Ground, out var gTile))
                     {
-                        // Береговая клетка: под берегом кладём анимированную воду,
-                        // чтобы она просвечивала через полупрозрачные края берегового тайла.
-                        // На слое земли — направленный береговой тайл.
-                        TileBase shoreResult = settings.shoreTiles.Resolve(
-                            wTop,    wBottom,
-                            wLeft,   wRight,
-                            wTopLeft,    wTopRight,
-                            wBottomLeft, wBottomRight);
-
-                        if (shoreResult == null)
-                            shoreResult = groundTile;
-
-                        waterMap.SetTile(pos, waterTile);
-                        groundMap.SetTile(pos, shoreResult);
-                    }
-                    else
-                    {
-                        // Обычная земля вдали от воды
-                        groundMap.SetTile(pos, groundTile);
-
-                        // Деревья спавним только на обычной земле (не на берегу)
-                        if (settings.treePrefab != null
-                            && Random.value < settings.treeSpawnChance)
-                        {
-                            float wx = chunkWorldPos.x + x + 0.5f;
-                            float wy = chunkWorldPos.y + y + 0.5f;
-                            var treeObj = Instantiate(
-                                settings.treePrefab,
-                                new Vector3(wx, wy, 0f),
-                                Quaternion.identity,
-                                transform);
-                            spawnedTrees.Add(treeObj);
-                        }
+                        groundMap.SetTile(pos, gTile);
+                        TrySpawnTree(data, chunkWorldPos, rx, ry, generator);
                     }
                 }
             }
+        }
+        
+        private TerrainType GetCorner(TerrainType[,] data, int x, int y, WorldGenerator generator)
+        {
+            int s = settings.chunkSize;
+            if (x < s && y < s)
+                return data[x, y];
+
+            float wx = Coord.x * s + x;
+            float wy = Coord.y * s + y;
+            return generator.GetTerrainType(new Vector3(wx, wy, 0));
+        }
+
+        private void TrySpawnTree(TerrainType[,] data, Vector3 chunkWorldPos, int x, int y, WorldGenerator generator)
+        {
+            if (!IsAllGroundAround(data, x, y, generator))
+                return;
+            
+            if (settings.treePrefab != null && Random.value < settings.treeSpawnChance)
+            {
+                float wx = Coord.x * settings.chunkSize + x + 0.5f;
+                float wy = Coord.y * settings.chunkSize + y + 0.5f;
+                var treeObj = Instantiate(
+                    settings.treePrefab,
+                    new Vector3(wx, wy, 0f),
+                    Quaternion.identity,
+                    transform);
+                spawnedTrees.Add(treeObj);
+            }
+        }
+        
+        private bool IsAllGroundAround(TerrainType[,] data, int x, int y, WorldGenerator generator)
+        {
+            return IsGroundAt(data, x, y + 1, generator)
+                   && IsGroundAt(data, x, y - 1, generator)
+                   && IsGroundAt(data, x - 1, y, generator)
+                   && IsGroundAt(data, x + 1, y, generator);
+        }
+        
+        private bool IsGroundAt(TerrainType[,] data, int x, int y, WorldGenerator generator)
+        {
+            int s = settings.chunkSize;
+            if (x >= 0 && x < s && y >= 0 && y < s)
+                return data[x, y] == TerrainType.Ground;
+
+            float wx = Coord.x * s + x;
+            float wy = Coord.y * s + y;
+            return generator.GetTerrainType(new Vector3(wx, wy, 0)) == TerrainType.Ground;
+        }
+
+        private void ClearAll()
+        {
+            // Удаляем деревья предыдущего рендера
+            foreach (var tree in spawnedTrees)
+                if (tree != null) Destroy(tree);
+            spawnedTrees.Clear();
+
+            groundMap.ClearAllTiles();
+            shoreMap.ClearAllTiles();
+            waterMap.ClearAllTiles();
         }
     }
 }

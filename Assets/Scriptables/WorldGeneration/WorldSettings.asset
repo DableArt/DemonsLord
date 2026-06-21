@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2ee66893a7cac6e4cb8fa7cc120583a4, type: 3}
+  m_Name: WorldSettings
+  m_EditorClassIdentifier: Assembly-CSharp::WorldSettings
+  chunkSize: 32
+  pixelsPerUnit: 16
+  loadRadiusChunks: 2
+  unloadRadiusChunks: 4
+  seed: 0
+  noiseScale: 0.06
+  waterThreshold: 0.45
+  shoreWidth: 2
+  dualGridTileSets: {fileID: 11400000, guid: bc33ba17910b26941bb851397a74a93e, type: 2}
+  npcPrefabs:
+  - {fileID: 2614573099348411580, guid: 132e4f885a754244381f79699bdea0e5, type: 3}
+  npcMinCount: 5
+  npcMaxCount: 10
+  treePrefab: {fileID: 3817094280501267634, guid: 5cb6935f0039e7e4bae4ead6f248759e, type: 3}
+  treeSpawnChance: 0.033
