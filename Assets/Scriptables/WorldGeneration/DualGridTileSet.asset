@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4c51afedbd524baeb2f0b0aa7ff99ac5, type: 3}
+  m_Name: DualGridTileSet
+  m_EditorClassIdentifier: Assembly-CSharp::WorldGenerate.DualGridTileSetSettings
+  tileSets:
+  - TerrainType: 2
+    FSC: {fileID: 11400000, guid: 868f619dad3b6af4e8d39300105e3740, type: 2}
+    TopRightConvC: {fileID: 11400000, guid: e82f58a9ed32e7a40bce9353b6530141, type: 2}
+    TopLeftConvC: {fileID: 11400000, guid: 3c479df30f33a0c42a87103f80056bb8, type: 2}
+    BotRightConvC: {fileID: 11400000, guid: 96a8000fc0d4a204dbe1c7cd5885b5ea, type: 2}
+    BotLeftConvC: {fileID: 11400000, guid: bbdfe8368135a714f8a510a69bdf7475, type: 2}
+    TopRightConcC: {fileID: 11400000, guid: 972603a28f55be042af29ce8845efce5, type: 2}
+    TopLeftConcC: {fileID: 11400000, guid: 361eb46a25df1ff4098079b67bbff32c, type: 2}
+    BotRightConcC: {fileID: 11400000, guid: fcbc90782f43e8d4597f7835774bd41a, type: 2}
+    BotLeftConcC: {fileID: 11400000, guid: 03168462e44136a46a00ca5b23073ffb, type: 2}
+    TopTSDC: {fileID: 11400000, guid: c349d7f797e7b6b4c84d1b432c1d08ea, type: 2}
+    BotTSDC: {fileID: 11400000, guid: 77d74b24d9c55aa498c1299470c737d1, type: 2}
+    RightTSDC: {fileID: 11400000, guid: 7011e0fca53adc548afc08bc14eb6ffc, type: 2}
+    LeftTSDC: {fileID: 11400000, guid: f99202950ad889e4f87c9d5f659bde81, type: 2}
+    TopLeftBotRightTSCC: {fileID: 11400000, guid: 1698cbb30d36694479a840ce1bb2f944, type: 2}
+    TopRightBotLeftTSCC: {fileID: 11400000, guid: f2032a7ff07fd1c4785879fca30bd55a, type: 2}
+  - TerrainType: 1
+    FSC: {fileID: 11400000, guid: 520f645639029984f8c70f2070b70933, type: 2}
+    TopRightConvC: {fileID: 11400000, guid: 839b6e361b3a08449ade613744c388e0, type: 2}
+    TopLeftConvC: {fileID: 11400000, guid: d8f742062d1f49a419ed4f207aa979d1, type: 2}
+    BotRightConvC: {fileID: 11400000, guid: ff7c7eaebbad27940b3ae1e5bacbdbbc, type: 2}
+    BotLeftConvC: {fileID: 11400000, guid: d56e1c9af74748342b9e747b2a87ae69, type: 2}
+    TopRightConcC: {fileID: 11400000, guid: 25c48a8ea3ffc6d459d6dbf5a6bf83e4, type: 2}
+    TopLeftConcC: {fileID: 11400000, guid: 4707dea6a4c6c724eae1b98de30c173c, type: 2}
+    BotRightConcC: {fileID: 11400000, guid: 9f1dfccd4858900459124d1c3fe6a59e, type: 2}
+    BotLeftConcC: {fileID: 11400000, guid: 250ee098bb8b42c4b949dd72529de037, type: 2}
+    TopTSDC: {fileID: 11400000, guid: f73307862da00c2459e5f02b43d5c375, type: 2}
+    BotTSDC: {fileID: 11400000, guid: 2b4716e31973d2d46a2351e88cc14d52, type: 2}
+    RightTSDC: {fileID: 11400000, guid: 0bee803a25971184dabbc6106b2a035d, type: 2}
+    LeftTSDC: {fileID: 11400000, guid: d7217805a8d1f914e83d55d92f233566, type: 2}
+    TopLeftBotRightTSCC: {fileID: 11400000, guid: 0b4aeddfb4b90b54f96785009c7e4f4d, type: 2}
+    TopRightBotLeftTSCC: {fileID: 11400000, guid: 81d7a633890ad4c4ba7688e19d6a0501, type: 2}
+  waterTile: {fileID: 11400000, guid: 1316190fb2aab2441ac459956ef6f364, type: 2}

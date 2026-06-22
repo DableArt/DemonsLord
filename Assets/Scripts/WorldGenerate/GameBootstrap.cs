@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using WorldGenerate;
 
 public class GameBootstrap : MonoBehaviour
 {
@@ -95,7 +96,7 @@ public class GameBootstrap : MonoBehaviour
                 float ry = Random.Range(-spawnRadius, spawnRadius);
                 Vector3 candidate = new Vector3(playerSpawnWorld.x + rx, playerSpawnWorld.y + ry, 0f);
 
-                if (generator.IsGroundTile(candidate))
+                if (generator.GetTerrainType(candidate) == TerrainType.Ground)
                 {
                     pos = candidate;
                     found = true;

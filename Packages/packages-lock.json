@@ -88,8 +88,8 @@
       }
     },
     "com.unity.2d.tilemap.extras": {
-      "version": "6.0.1",
-      "depth": 1,
+      "version": "6.0.2",
+      "depth": 0,
       "source": "registry",
       "dependencies": {
         "com.unity.2d.tilemap": "1.0.0",
@@ -164,7 +164,7 @@
         "com.unity.2d.sprite": "1.0.0",
         "com.unity.2d.spriteshape": "13.0.0",
         "com.unity.2d.tilemap": "1.0.0",
-        "com.unity.2d.tilemap.extras": "6.0.1",
+        "com.unity.2d.tilemap.extras": "6.0.2",
         "com.unity.2d.aseprite": "3.0.1",
         "com.unity.2d.tooling": "1.0.2"
       }

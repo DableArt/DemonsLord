@@ -19,11 +19,11 @@ MonoBehaviour:
   seed: 0
   noiseScale: 0.06
   waterThreshold: 0.45
-  groundTile: {fileID: 11400000, guid: 42b49eb3fd622e14c9b5b27452ad107a, type: 2}
-  waterTile: {fileID: 11400000, guid: 8c31160c155d6524e8f51e14b1e33f5d, type: 2}
+  shoreWidth: 2
+  dualGridTileSets: {fileID: 11400000, guid: bc33ba17910b26941bb851397a74a93e, type: 2}
   npcPrefabs:
   - {fileID: 2614573099348411580, guid: 132e4f885a754244381f79699bdea0e5, type: 3}
   npcMinCount: 5
   npcMaxCount: 10
   treePrefab: {fileID: 3817094280501267634, guid: 5cb6935f0039e7e4bae4ead6f248759e, type: 3}
-  treeSpawnChance: 0.193
+  treeSpawnChance: 0.033
