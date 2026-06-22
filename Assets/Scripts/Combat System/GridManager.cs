@@ -18,7 +18,9 @@ public class GridManager : MonoBehaviour
     public Vector3 GridOrigin => cellsParent != null ? cellsParent.position : Vector3.zero;
 
     public Color highlightColor = Color.yellow;
+    public Color spellHighlightColor = new Color(0.3f, 0.6f, 1f, 0.5f);
     private HashSet<Vector2Int> highlightedCells = new HashSet<Vector2Int>();
+    private HashSet<Vector2Int> spellHighlightedCells = new HashSet<Vector2Int>();
 
     public void HighlightCells(IEnumerable<Vector2Int> cells)
     {
@@ -29,6 +31,19 @@ public class GridManager : MonoBehaviour
             {
                 highlightedCells.Add(pt);
                 go.GetComponent<SpriteRenderer>().color = highlightColor;
+            }
+        }
+    }
+
+    public void HighlightSpellRange(IEnumerable<Vector2Int> cells)
+    {
+        ClearSpellHighlights();
+        foreach (var pt in cells)
+        {
+            if (cellObjects.TryGetValue(pt, out var go))
+            {
+                spellHighlightedCells.Add(pt);
+                go.GetComponent<SpriteRenderer>().color = spellHighlightColor;
             }
         }
     }
@@ -44,6 +59,25 @@ public class GridManager : MonoBehaviour
             }
         }
         highlightedCells.Clear();
+    }
+
+    public void ClearSpellHighlights()
+    {
+        foreach (var pt in spellHighlightedCells)
+        {
+            if (cellObjects.TryGetValue(pt, out var go))
+            {
+                var sr = go.GetComponent<SpriteRenderer>();
+                if (highlightedCells.Contains(pt))
+                    sr.color = highlightColor;
+                else
+                {
+                    var cell = grid.GetCell(pt);
+                    sr.color = GetTerrainColor(cell.terrain);
+                }
+            }
+        }
+        spellHighlightedCells.Clear();
     }
 
     public List<Vector2Int> GetReachableCells(Vector2Int from, int maxDist, Unit unit)

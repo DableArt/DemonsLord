@@ -26,9 +26,11 @@ MonoBehaviour:
   baseATK: 10
   baseDEF: 5
   baseATKRange: 4
+  baseMoveRange: 3
   baseHP: 50
   baseMP: 20
-  defaultSpells: []
+  defaultSpells:
+  - {fileID: 11400000, guid: da131fbaafeb64c43a48c7308260a22d, type: 2}
   passiveAbilities: []
   activeAbilities: []
   ultimateAbility: {fileID: 0}

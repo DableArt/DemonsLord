@@ -357,7 +357,7 @@ public class BattleManager : MonoBehaviour
             OnPlayerUltimate();
         }
 
-        if (Input.GetKeyDown(KeyCode.Escape) && isSelectingTarget)
+        if (Input.GetKeyDown(KeyCode.Escape) && (isSelectingMagic || isSelectingTarget))
         {
             CancelMagicMode();
         }
@@ -464,8 +464,32 @@ public class BattleManager : MonoBehaviour
         int dist = Mathf.Abs(current.gridPosition.x - cell.x) + Mathf.Abs(current.gridPosition.y - cell.y);
         if (dist > selectedSpell.range) return;
 
+        if (!IsValidTargetCell(selectedSpell, cell)) return;
+
+        var spell = selectedSpell;
         CancelMagicMode();
-        StartCoroutine(ExecuteSpellCast(current, caster, selectedSpell, cell));
+        StartCoroutine(ExecuteSpellCast(current, caster, spell, cell));
+    }
+
+    bool IsValidTargetCell(SpellBase spell, Vector2Int cell)
+    {
+        var current = turnManager.CurrentUnit;
+
+        switch (spell.targetType)
+        {
+            case SpellTargetType.Cell:
+                return true;
+            case SpellTargetType.Self:
+                return cell == current.gridPosition;
+            case SpellTargetType.Enemy:
+            case SpellTargetType.AllEnemies:
+                return enemySquad.GetUnitAtPosition(cell) != null;
+            case SpellTargetType.Ally:
+            case SpellTargetType.AllAllies:
+                return playerSquad.GetUnitAtPosition(cell) != null || cell == current.gridPosition;
+            default:
+                return true;
+        }
     }
 
     IEnumerator ExecuteSpellCast(Unit casterUnit, SpellCaster caster, SpellBase spell, Vector2Int targetCell)
@@ -531,6 +555,7 @@ public class BattleManager : MonoBehaviour
         isSelectingMagic = false;
         isSelectingTarget = false;
         selectedSpell = null;
+        gridManager?.ClearSpellHighlights();
         OnTurnUIUpdate();
     }
 
@@ -772,6 +797,13 @@ public class BattleManager : MonoBehaviour
     public void OnPlayerSelectMagic()
     {
         if (currentPhase != BattlePhase.PlayerTurn || isProcessingTurn) return;
+
+        if (isSelectingMagic || isSelectingTarget)
+        {
+            CancelMagicMode();
+            return;
+        }
+
         var current = turnManager.CurrentUnit;
         if (current == null || !current.IsAlive) return;
 
@@ -949,18 +981,28 @@ public class BattleManager : MonoBehaviour
         else if (isSelectingTarget && selectedSpell != null)
         {
             ui.ShowTargetingInfo(selectedSpell);
+            ShowSpellRange(current, selectedSpell);
         }
         else
         {
             ui.HideMagicPanel();
+            gridManager?.ClearSpellHighlights();
         }
     }
 
     void ShowMoveRange(Unit unit)
     {
         if (unit == null) return;
+        gridManager.ClearSpellHighlights();
         var cells = gridManager.GetReachableCells(unit.gridPosition, unit.moveRange, unit);
         gridManager.HighlightCells(cells);
+    }
+
+    void ShowSpellRange(Unit unit, SpellBase spell)
+    {
+        if (unit == null || spell == null) return;
+        var cells = gridManager.GetReachableCells(unit.gridPosition, spell.range, unit);
+        gridManager.HighlightSpellRange(cells);
     }
 
     void OnBattleEnd(bool playerWon)
