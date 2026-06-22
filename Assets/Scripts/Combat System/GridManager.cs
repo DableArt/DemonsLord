@@ -308,7 +308,9 @@ public class GridManager : MonoBehaviour
 
         SetUnitOccupancy(unit, pos, true);
         unit.gridPosition = pos;
-        unit.transform.position = GridOrigin + new Vector3(pos.x + 0.5f, pos.y + 0.5f, 0);
+        var t = unit.transform;
+        t.SetParent(cellsParent, false);
+        t.localPosition = new Vector3(pos.x + 0.5f, pos.y + 0.5f, 0);
     }
 
     public void RemoveUnitFromGrid(Unit unit)
@@ -333,7 +335,9 @@ public class GridManager : MonoBehaviour
         SetUnitOccupancy(unit, from, false);
         SetUnitOccupancy(unit, to, true);
         unit.gridPosition = to;
-        unit.transform.position = GridOrigin + new Vector3(to.x + 0.5f, to.y + 0.5f, 0);
+        var t = unit.transform;
+        t.SetParent(cellsParent, false);
+        t.localPosition = new Vector3(to.x + 0.5f, to.y + 0.5f, 0);
 
         OnUnitMove?.Invoke(new UnitMoveContext(unit, from, to));
     }

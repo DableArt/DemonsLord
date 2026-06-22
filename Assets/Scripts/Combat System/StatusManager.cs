@@ -53,31 +53,28 @@ public class StatusManager : MonoBehaviour
     {
         foreach (var status in _statuses.ToList())
         {
-            if (status.IsDot)
+            switch (status.type)
             {
-                switch (status.type)
-                {
-                    case StatusEffectType.Burn:
-                        _unit.TakeDamage(status.potency);
-                        FloatingDamage.ShowDamage(_unit, status.potency);
-                        Debug.Log($"[Status] {_unit.unitName} получает {status.potency} урона от {status.type}");
-                        break;
-                    case StatusEffectType.Poison:
-                        _unit.TakeDamage(status.potency);
-                        FloatingDamage.ShowDamage(_unit, status.potency);
-                        Debug.Log($"[Status] {_unit.unitName} получает {status.potency} урона от {status.type}");
-                        break;
-                    case StatusEffectType.Bleed:
-                        _unit.TakeDamage(status.potency);
-                        FloatingDamage.ShowDamage(_unit, status.potency);
-                        Debug.Log($"[Status] {_unit.unitName} получает {status.potency} урона от {status.type}");
-                        break;
-                    case StatusEffectType.Regeneration:
-                        _unit.Heal(status.potency);
-                        FloatingDamage.ShowHeal(_unit, status.potency);
-                        Debug.Log($"[Status] {_unit.unitName} восстанавливает {status.potency} HP от {status.type}");
-                        break;
-                }
+                case StatusEffectType.Burn:
+                    _unit.TakeDamage(status.potency);
+                    FloatingDamage.ShowDamage(_unit, status.potency);
+                    Debug.Log($"[Status] {_unit.unitName} получает {status.potency} урона от {status.type}");
+                    break;
+                case StatusEffectType.Poison:
+                    _unit.TakeDamage(status.potency);
+                    FloatingDamage.ShowDamage(_unit, status.potency);
+                    Debug.Log($"[Status] {_unit.unitName} получает {status.potency} урона от {status.type}");
+                    break;
+                case StatusEffectType.Bleed:
+                    _unit.TakeDamage(status.potency);
+                    FloatingDamage.ShowDamage(_unit, status.potency);
+                    Debug.Log($"[Status] {_unit.unitName} получает {status.potency} урона от {status.type}");
+                    break;
+                case StatusEffectType.Regeneration:
+                    _unit.Heal(status.potency);
+                    FloatingDamage.ShowHeal(_unit, status.potency);
+                    Debug.Log($"[Status] {_unit.unitName} восстанавливает {status.potency} HP от {status.type}");
+                    break;
             }
 
             status.remainingDuration--;

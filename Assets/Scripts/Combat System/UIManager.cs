@@ -27,6 +27,11 @@ public class UIManager : MonoBehaviour
     public TMP_Text effectsText;
     public TMP_Text bonusText;
 
+    [Header("Status Effects")]
+    public StatusEffectIconSet statusIconSet;
+    public RectTransform statusIconsParent;
+    public Image statusIconPrefab;
+
     [Header("Squad Roster")]
     public TMP_Text squadRosterText;
 
@@ -108,8 +113,23 @@ public class UIManager : MonoBehaviour
                 if (abilityComp.passiveAbilities.Count > 0)
                     effects += $"Passives: {abilityComp.passiveAbilities.Count}\n";
             }
+
+            var sm = unit.GetComponent<StatusManager>();
+            if (sm != null)
+            {
+                var active = sm.GetActiveStatuses();
+                if (active.Count > 0)
+                {
+                    effects += "\n<b>Statuses:</b>\n";
+                    foreach (var s in active)
+                        effects += $"  {s.type} ({s.remainingDuration}t)\n";
+                }
+            }
+
             effectsText.text = effects;
         }
+
+        UpdateStatusIcons(unit);
 
         if (btnMagic != null)
         {
@@ -240,6 +260,25 @@ public class UIManager : MonoBehaviour
             var current = _battleManager?.turnManager?.CurrentUnit;
             var abilityComp = current?.GetComponent<AbilityComponent>();
             btnSpecial.interactable = value && abilityComp != null && abilityComp.CanUseUltimate();
+        }
+    }
+
+    void UpdateStatusIcons(Unit unit)
+    {
+        if (statusIconsParent == null || statusIconPrefab == null) return;
+
+        for (int i = statusIconsParent.childCount - 1; i >= 0; i--)
+            Destroy(statusIconsParent.GetChild(i).gameObject);
+
+        var sm = unit?.GetComponent<StatusManager>();
+        if (sm == null) return;
+
+        foreach (var status in sm.GetActiveStatuses())
+        {
+            var icon = statusIconSet != null ? statusIconSet.GetIcon(status.type) : null;
+            var img = Instantiate(statusIconPrefab, statusIconsParent);
+            img.gameObject.SetActive(true);
+            if (icon != null) img.sprite = icon;
         }
     }
 

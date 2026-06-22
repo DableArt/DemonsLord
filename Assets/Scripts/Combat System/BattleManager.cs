@@ -365,6 +365,21 @@ public class BattleManager : MonoBehaviour
 
     }
 
+    Vector2Int GetCellFromMouse()
+    {
+        Vector3 mouseWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        mouseWorld.z = 0;
+        if (gridManager.cellsParent != null)
+        {
+            var local = gridManager.cellsParent.InverseTransformPoint(mouseWorld);
+            return new Vector2Int(Mathf.FloorToInt(local.x), Mathf.FloorToInt(local.y));
+        }
+        return new Vector2Int(
+            Mathf.FloorToInt(mouseWorld.x - gridManager.GridOrigin.x),
+            Mathf.FloorToInt(mouseWorld.y - gridManager.GridOrigin.y)
+        );
+    }
+
     void HandleMouseInput()
     {
         if (!Input.GetMouseButtonDown(0)) return;
@@ -375,12 +390,7 @@ public class BattleManager : MonoBehaviour
             return;
         }
 
-        Vector3 origin = gridManager.GridOrigin;
-        Vector3 mouseWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        Vector2Int cell = new Vector2Int(
-            Mathf.FloorToInt(mouseWorld.x - origin.x),
-            Mathf.FloorToInt(mouseWorld.y - origin.y)
-        );
+        Vector2Int cell = GetCellFromMouse();
 
         if (!gridManager.grid.IsWithinBounds(cell)) return;
 
@@ -446,12 +456,7 @@ public class BattleManager : MonoBehaviour
 
     void TryCastSpellAtMouse()
     {
-        Vector3 origin = gridManager.GridOrigin;
-        Vector3 mouseWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        Vector2Int cell = new Vector2Int(
-            Mathf.FloorToInt(mouseWorld.x - origin.x),
-            Mathf.FloorToInt(mouseWorld.y - origin.y)
-        );
+        Vector2Int cell = GetCellFromMouse();
 
         if (!gridManager.grid.IsWithinBounds(cell)) return;
 
@@ -780,6 +785,11 @@ public class BattleManager : MonoBehaviour
         var current = turnManager.CurrentUnit;
         if (current == null || !current.IsAlive) return;
         CancelMagicMode();
+
+        var sm = current.GetComponent<StatusManager>();
+        if (sm != null)
+            sm.AddStatus(StatusEffectType.Shield, 1, 5, "Defend");
+
         ClearUnitSelection();
         EndPlayerTurn();
     }

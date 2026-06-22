@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5adc7bcc15813434b894c0cc61ae4ed5, type: 3}
+  m_Name: StatusEffectIconSet
+  m_EditorClassIdentifier: Assembly-CSharp::StatusEffectIconSet
+  entries:
+  - type: 0
+    icon: {fileID: 21300000, guid: 46fef8c28ef70284e8d39885cf28851a, type: 3}
+  - type: 8
+    icon: {fileID: 21300000, guid: 9eac61e01595711409b2ac9948349196, type: 3}
