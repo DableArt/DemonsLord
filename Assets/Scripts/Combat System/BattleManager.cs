@@ -413,6 +413,9 @@ public class BattleManager : MonoBehaviour
                 return;
             }
 
+            var reachable = gridManager.GetReachableCells(current.gridPosition, current.moveRange, current);
+            if (!reachable.Contains(cell)) return;
+
             var path = PathFindingHelper.FindPath(gridManager.grid, current.gridPosition, cell, current);
             if (path.IsValid && path.Length > 1)
             {

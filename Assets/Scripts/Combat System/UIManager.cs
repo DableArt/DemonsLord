@@ -13,7 +13,17 @@ public class UIManager : MonoBehaviour
     public TMP_Text mpText;
     public Image ultimateBar;
     public TMP_Text ultimateText;
-    public TMP_Text statsText;
+    [Header("Stats")]
+    public TMP_Text atkText;
+    public TMP_Text defText;
+    public TMP_Text strText;
+    public TMP_Text agiText;
+    public TMP_Text endText;
+    public TMP_Text intText;
+    public TMP_Text chaText;
+    public TMP_Text lukText;
+    public TMP_Text rankText;
+    public TMP_Text typeText;
     public TMP_Text effectsText;
     public TMP_Text bonusText;
 
@@ -76,12 +86,16 @@ public class UIManager : MonoBehaviour
         if (ultimateBar != null) ultimateBar.fillAmount = unit.maxUltimateCharge > 0 ? (float)unit.currentUltimateCharge / unit.maxUltimateCharge : 0f;
         if (ultimateText != null) ultimateText.text = $"{unit.currentUltimateCharge}/{unit.maxUltimateCharge}";
 
-        if (statsText != null)
-            statsText.text = $"ATK {unit.attack}  DEF {unit.defense}\n" +
-                             $"STR {unit.strength}  AGI {unit.agility}\n" +
-                             $"END {unit.endurance}  INT {unit.intelligence}\n" +
-                             $"CHA {unit.charisma}  LUK {unit.luck}\n" +
-                             $"Rank: {unit.rank}   Type: {unit.habitatType}";
+        if (atkText != null) atkText.text = unit.attack.ToString();
+        if (defText != null) defText.text = unit.defense.ToString();
+        if (strText != null) strText.text = unit.strength.ToString();
+        if (agiText != null) agiText.text = unit.agility.ToString();
+        if (endText != null) endText.text = unit.endurance.ToString();
+        if (intText != null) intText.text = unit.intelligence.ToString();
+        if (chaText != null) chaText.text = unit.charisma.ToString();
+        if (lukText != null) lukText.text = unit.luck.ToString();
+        if (rankText != null) rankText.text = unit.rank.ToString();
+        if (typeText != null) typeText.text = unit.habitatType.ToString();
 
         if (effectsText != null)
         {
@@ -168,7 +182,7 @@ public class UIManager : MonoBehaviour
         var current = _battleManager.turnManager.CurrentUnit;
         int idx = queue.IndexOf(current);
         if (idx < 0) idx = 0;
-        turnOrderUI.UpdateTurnOrder(queue, idx, current);
+        turnOrderUI.UpdateTurnOrder(queue, idx, current, _battleManager.playerSquad);
     }
 
     public void ShowMagicPanel(SpellCaster caster)
