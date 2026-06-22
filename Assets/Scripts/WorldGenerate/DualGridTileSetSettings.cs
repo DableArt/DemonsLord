@@ -9,5 +9,6 @@ namespace WorldGenerate
     {
         public List<DualGridTileSetData> tileSets;
         public TileBase waterTile;
+        public TileBase waterColisionTile;
     }
 }

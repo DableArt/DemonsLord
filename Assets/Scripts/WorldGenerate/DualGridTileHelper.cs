@@ -7,10 +7,13 @@ namespace WorldGenerate
     {
         private TileBase waterTile;
         private Dictionary<TerrainType, DualGridTileSetData> dualGridTileSetsDictionary;
+        
+        public TileBase WaterCollisionTile { get; private set; }
 
         public void Init(DualGridTileSetSettings settings)
         {
             waterTile = settings.waterTile;
+            WaterCollisionTile = settings.waterColisionTile;
             
             dualGridTileSetsDictionary = new Dictionary<TerrainType, DualGridTileSetData>();
 

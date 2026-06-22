@@ -10,6 +10,9 @@ namespace WorldGenerate
         private WorldSettings settings;
         private DualGridTileHelper tileHelper;
 
+        //Карта коллизий воды
+        private Tilemap waterCollisionMap;
+        
         // Sorting order 0 — вода (рисуется ниже всего)
         private Tilemap waterMap;
         // Sorting order 1 — берег (рисуется поверх воды)
@@ -37,20 +40,21 @@ namespace WorldGenerate
             gameObject.AddComponent<UnityEngine.Grid>();
 
             // Сначала создаём слой воды (sortingOrder = 0) — он под землёй
-            waterMap = CreateTilemapChild("Water", sortingOrder: 0, addCollider: true);
+            waterMap = CreateTilemapChild("Water", sortingOrder: 0, addCollider: false);
 
             // Береговая линия (sortingOrder = 1) над водой, но под землёй
             shoreMap = CreateTilemapChild("Shore", sortingOrder: 1, addCollider: false); 
 
             // Затем слой земли (sortingOrder = 2) — поверх воды и береговой линии
-            groundMap = CreateTilemapChild("Ground", sortingOrder: 2, addCollider: false); 
+            groundMap = CreateTilemapChild("Ground", sortingOrder: 2, addCollider: false);
+
+            waterCollisionMap = CreateCollisionTilemap();
         }
 
         private Tilemap CreateTilemapChild(string n, int sortingOrder, bool addCollider)
         {
             var go = new GameObject(n);
             go.transform.SetParent(transform, false);
-            //go.transform.localPosition = new Vector3(1f, 1f, 0);
             go.transform.localPosition = Vector3.zero;
 
             var tilemap = go.AddComponent<Tilemap>();
@@ -68,6 +72,28 @@ namespace WorldGenerate
                 var comp = go.AddComponent<CompositeCollider2D>();
                 comp.geometryType = CompositeCollider2D.GeometryType.Outlines;
             }
+
+            return tilemap;
+        }
+        
+        private Tilemap CreateCollisionTilemap()
+        {
+            var go = new GameObject("WaterCollision");
+            go.transform.SetParent(transform, false);
+            go.transform.localPosition = Vector3.zero;
+
+            var tilemap = go.AddComponent<Tilemap>();
+            var renderer = go.AddComponent<TilemapRenderer>();
+            renderer.enabled = false;                              // скрыт
+
+            var rb = go.AddComponent<Rigidbody2D>();
+            rb.bodyType = RigidbodyType2D.Static;
+
+            var col = go.AddComponent<TilemapCollider2D>();
+            col.compositeOperation = Collider2D.CompositeOperation.Merge;
+
+            var comp = go.AddComponent<CompositeCollider2D>();
+            comp.geometryType = CompositeCollider2D.GeometryType.Outlines;
 
             return tilemap;
         }
@@ -108,6 +134,9 @@ namespace WorldGenerate
                         groundMap.SetTile(pos, gTile);
                         TrySpawnTree(data, chunkWorldPos, rx, ry, generator);
                     }
+
+                    if (bl == TerrainType.Water &&  br == TerrainType.Water && tl ==TerrainType.Water && tr == TerrainType.Water)
+                        waterCollisionMap.SetTile(pos, tileHelper.WaterCollisionTile);
                 }
             }
         }
@@ -169,6 +198,7 @@ namespace WorldGenerate
 
             groundMap.ClearAllTiles();
             shoreMap.ClearAllTiles();
+            waterCollisionMap.ClearAllTiles();
             waterMap.ClearAllTiles();
         }
     }

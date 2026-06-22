@@ -30,7 +30,7 @@ public class NpcAi : MonoBehaviour
     private Vector3 targetPosition;
 
     /// <summary>Name of the water tilemap child created by <see cref="Chunk"/>.</summary>
-    private const string WaterTilemapName = "Water";
+    private const string WaterTilemapName = "WaterCollision";
 
     private void Start()
     {
